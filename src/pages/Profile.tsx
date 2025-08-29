@@ -5,10 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import { User, Settings, LogOut, BarChart3 } from "lucide-react";
+import ProfileSidebar from "@/components/ProfileSidebar";
+import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDashboard } from "lucide-react";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,13 +38,25 @@ const Profile = () => {
     console.log("Saving profile data:", profileData);
   };
 
+  const currentUser = {
+    name: profileData.fullName,
+    email: profileData.email,
+    avatar: "/placeholder.svg"
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      
+      {/* Profile Sidebar for Mobile */}
+      <div className="fixed top-20 left-4 z-50 lg:hidden">
+        <ProfileSidebar user={currentUser} />
+      </div>
+      
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="lg:w-1/4 space-y-6">
+          {/* Sidebar - Desktop */}
+          <div className="hidden lg:block lg:w-1/4 space-y-6">
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardHeader className="text-center">
                 <Avatar className="h-20 w-20 mx-auto mb-4">
@@ -58,28 +72,34 @@ const Profile = () => {
 
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardContent className="pt-6 space-y-3">
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
-                  <User className="h-4 w-4 mr-2" />
-                  Dashboard
-                </Button>
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
                 <Button variant="default" className="w-full justify-start bg-primary text-primary-foreground">
                   <Settings className="h-4 w-4 mr-2" />
                   Personal Information
                 </Button>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Quotations
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Membership & Billings
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
-                  Message
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
-                  Account Settings
-                </Button>
+                <Link to="/quotations">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Quotations
+                  </Button>
+                </Link>
+                <Link to="/membership">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Membership & Billings
+                  </Button>
+                </Link>
+                <Link to="/chat">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                </Link>
                 <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out

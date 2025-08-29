@@ -69,7 +69,7 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-card/95 backdrop-blur-sm border-t border-border animate-slide-up">
+          <div className="md:hidden bg-card/95 backdrop-blur-sm border-t border-border animate-slide-down">
             <div className="px-4 py-6 space-y-4">
               <a href="#about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 About us

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
@@ -88,9 +89,11 @@ const Quotations = () => {
               "Review your past service quotations, track pricing history, and convert accepted quotes into orders."
             </p>
           </div>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 md:mt-0">
-            Request New Quotation
-          </Button>
+          <Link to="/request-quotation">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 md:mt-0">
+              Request New Quotation
+            </Button>
+          </Link>
         </div>
 
         {/* Filters */}
@@ -200,9 +203,11 @@ const Quotations = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Get a custom quotation for your next project
               </p>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Get A Quotation
-              </Button>
+              <Link to="/request-quotation">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Get A Quotation
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -212,9 +217,11 @@ const Quotations = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Compare different service packages and pricing
               </p>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Get A Quotation
-              </Button>
+              <Link to="/request-quotation">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Get A Quotation
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -224,9 +231,11 @@ const Quotations = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Get quotes for multiple services at once
               </p>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Get A Quotation
-              </Button>
+              <Link to="/request-quotation">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Get A Quotation
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
