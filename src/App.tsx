@@ -9,6 +9,11 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
+import Chat from "./pages/Chat";
+import MembershipBilling from "./pages/MembershipBilling";
+import Dashboard from "./pages/Dashboard";
+import RequestQuotation from "./pages/RequestQuotation";
+import Quotations from "./pages/Quotations";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +29,11 @@ const App = () => (
           <Route path="/signup" element={<SignUp />} />
           <Route path="/community" element={<Community />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/membership" element={<MembershipBilling />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/request-quotation" element={<RequestQuotation />} />
+          <Route path="/quotations" element={<Quotations />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

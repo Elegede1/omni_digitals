@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import { Link } from "react-router-dom";
 
@@ -19,63 +17,57 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="container mx-auto px-4 pt-24 pb-16">
-        <div className="max-w-md mx-auto">
-          <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-            <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-2xl font-bold text-foreground">
-                Sign In
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Enter your credentials to access your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background border-border/50 focus:border-primary"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background border-border/50 focus:border-primary"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
-                >
-                  Sign In
-                </Button>
-              </form>
-              <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/signup" className="text-primary hover:underline">
-                  Sign up here
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      <Footer />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+        <CardHeader className="space-y-1 text-center">
+          <CardTitle className="text-2xl font-bold text-foreground">Welcome back</CardTitle>
+          <p className="text-muted-foreground">
+            Enter your credentials to access your account
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-foreground">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              className="bg-background border-border/50 focus:border-primary"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-foreground">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              className="bg-background border-border/50 focus:border-primary"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="remember" className="rounded" />
+              <Label htmlFor="remember" className="text-sm text-muted-foreground">
+                Remember me
+              </Label>
+            </div>
+            <Link to="#" className="text-sm text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+            Sign In
+          </Button>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
       <DarkModeToggle />
     </div>
   );
