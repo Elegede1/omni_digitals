@@ -1,4 +1,7 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
 
 const Footer = () => {
   return (
@@ -8,14 +11,19 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold text-foreground">BP</div>
-              <div className="text-lg font-semibold text-foreground">
-                <span className="text-primary">Boost</span> Promotions
-              </div>
+              <img 
+                src={logoLight} 
+                alt="MNI Digitals" 
+                className="h-6 w-auto dark:hidden"
+              />
+              <img 
+                src={logoDark} 
+                alt="MNI Digitals" 
+                className="h-6 w-auto hidden dark:block"
+              />
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Your trusted online service partner for digital marketing, branding, 
-              and web development solutions that drive business growth.
+              Innovative digital solutions for modern businesses. We specialize in creating powerful online experiences that drive growth.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
@@ -116,7 +124,7 @@ const Footer = () => {
         <div className="border-t border-border mt-16 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © 2024 Boost Promotions. All rights reserved.
+              © 2024 MNI Digitals. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300 text-sm">

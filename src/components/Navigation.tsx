@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,14 +13,18 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-              BP
-            </div>
-            <div className="hidden sm:block text-lg font-semibold text-foreground">
-              <span className="text-primary">Boost</span> Promotions
-            </div>
-          </div>
+          <Link to="/" className="flex items-center space-x-2 cursor-pointer group">
+            <img 
+              src={logoLight} 
+              alt="MNI Digitals" 
+              className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:scale-105"
+            />
+            <img 
+              src={logoDark} 
+              alt="MNI Digitals" 
+              className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105"
+            />
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -27,18 +34,28 @@ const Navigation = () => {
             <a href="#services" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Services
             </a>
-            <a href="#community" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
+            <Link to="/community" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Community
-            </a>
+            </Link>
             <a href="#works" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Works
             </a>
-            <Button 
-              variant="default" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow hover:shadow-elegant transition-all duration-300 hover:scale-105"
-            >
-              Book a service
-            </Button>
+            <Link to="/signin">
+              <Button 
+                variant="outline" 
+                className="mr-2 border-primary text-primary hover:bg-primary/10 transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button 
+                variant="default" 
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow hover:shadow-elegant transition-all duration-300 hover:scale-105"
+              >
+                Sign Up
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -60,18 +77,30 @@ const Navigation = () => {
               <a href="#services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 Services
               </a>
-              <a href="#community" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
+              <Link to="/community" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 Community
-              </a>
+              </Link>
               <a href="#works" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 Works
               </a>
-              <Button 
-                variant="default" 
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
-              >
-                Book a service
-              </Button>
+              <div className="space-y-2">
+                <Link to="/signin" className="block">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-primary text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup" className="block">
+                  <Button 
+                    variant="default" 
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         )}

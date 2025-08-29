@@ -1,0 +1,246 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import DarkModeToggle from "@/components/DarkModeToggle";
+import { Search, Heart, MessageCircle, Share } from "lucide-react";
+
+const Community = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [newQuestion, setNewQuestion] = useState("");
+
+  const posts = [
+    {
+      id: 1,
+      author: "Golanginja",
+      avatar: "/placeholder.svg",
+      title: "How to patch KDE on FreeBSD?",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquam mauris neque ut magna quis magna ut sit nulla.",
+      tags: ["golang", "java", "apache"],
+      likes: 156,
+      comments: 12,
+      shares: 8,
+      timeAgo: "2h ago"
+    },
+    {
+      id: 2,
+      author: "Linuxdid",
+      avatar: "/placeholder.svg",
+      title: "What is a difference between Java nad JavaScript?",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Blanditiis vitae etiam lacus quis nulla.",
+      tags: ["java", "javascript", "web"],
+      likes: 103,
+      comments: 5,
+      shares: 3,
+      timeAgo: "4h ago"
+    },
+    {
+      id: 3,
+      author: "Golanginja",
+      avatar: "/placeholder.svg",
+      title: "How to patch KDE on FreeBSD?",
+      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquam mauris neque ut magna quis magna ut sit nulla.",
+      tags: ["golang", "java", "apache"],
+      likes: 89,
+      comments: 7,
+      shares: 2,
+      timeAgo: "6h ago"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="container mx-auto px-4 pt-24 pb-16">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="lg:w-1/4 space-y-6">
+            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  Navigation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  Questions
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  Tags
+                </Button>
+                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  Ranking
+                </Button>
+                <div className="pt-4 border-t border-border/50">
+                  <h4 className="font-medium text-foreground mb-2">Personal Navigator</h4>
+                  <Button variant="ghost" className="w-full justify-start text-primary">
+                    Your questions
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    Your answers
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                    Your likes & votes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  Must-read posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  • Please read rules before you start
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  • When is it helpful of "Additional
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  Featured links
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="text-sm text-primary cursor-pointer hover:underline">
+                  • Algorithm source code on GitHub
+                </div>
+                <div className="text-sm text-primary cursor-pointer hover:underline">
+                  • DigitalOcean Referrals
+                </div>
+                <div className="text-sm text-primary cursor-pointer hover:underline">
+                  • AWS tutorial dashsoard ai
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:w-3/4 space-y-6">
+            {/* Search and Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-background border-border/50 focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="default" size="sm" className="bg-primary text-primary-foreground">
+                  New
+                </Button>
+                <Button variant="outline" size="sm" className="border-border/50">
+                  Top
+                </Button>
+                <Button variant="outline" size="sm" className="border-border/50">
+                  Hot
+                </Button>
+                <Button variant="outline" size="sm" className="border-border/50">
+                  Closed
+                </Button>
+              </div>
+            </div>
+
+            {/* New Question Form */}
+            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <Input
+                    placeholder="Question"
+                    className="bg-background border-border/50 focus:border-primary"
+                  />
+                  <Textarea
+                    placeholder="Describe your question"
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    className="bg-background border-border/50 focus:border-primary min-h-[100px]"
+                  />
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" className="border-border/50">
+                        Categories
+                      </Button>
+                    </div>
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                      Publish
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Posts */}
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <Card key={post.id} className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={post.avatar} alt={post.author} />
+                        <AvatarFallback>{post.author[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-foreground">{post.author}</span>
+                            <span className="text-sm text-muted-foreground">{post.timeAgo}</span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-foreground mb-2">
+                            {post.title}
+                          </h3>
+                          <p className="text-muted-foreground mb-3">
+                            {post.content}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {post.tags.map((tag) => (
+                              <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                            <Heart className="h-4 w-4" />
+                            <span>{post.likes}</span>
+                          </button>
+                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{post.comments}</span>
+                          </button>
+                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                            <Share className="h-4 w-4" />
+                            <span>{post.shares}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
+      <DarkModeToggle />
+    </div>
+  );
+};
+
+export default Community;
