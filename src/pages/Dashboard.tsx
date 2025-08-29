@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import ProfileSidebar from "@/components/ProfileSidebar";
 import { TrendingUp, Eye, BarChart3 } from "lucide-react";
 
 const Dashboard = () => {
@@ -23,9 +24,16 @@ const Dashboard = () => {
     { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" }
   ];
 
+  const mockUser = {
+    name: "Ebuka",
+    email: "ebuka@example.com",
+    avatar: ""
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <ProfileSidebar user={mockUser} />
       <div className="container mx-auto px-4 pt-24 pb-16">
         {/* Welcome Section */}
         <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 mb-8">

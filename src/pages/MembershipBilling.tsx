@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import ProfileSidebar from "@/components/ProfileSidebar";
 import { Check, CreditCard, Calendar, Download } from "lucide-react";
 
 const MembershipBilling = () => {
@@ -72,9 +73,16 @@ const MembershipBilling = () => {
     { date: "Apr 16, 2021 at 09:13 PM", description: "Standard subscription (monthly)", amount: "$20.00" }
   ];
 
+  const mockUser = {
+    name: "Jenny Wilson",
+    email: "jenny@example.com",
+    avatar: ""
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <ProfileSidebar user={mockUser} />
       <div className="container mx-auto px-4 pt-24 pb-16">
         {/* Current Membership */}
         <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 mb-8">

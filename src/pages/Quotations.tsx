@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import ProfileSidebar from "@/components/ProfileSidebar";
 import { Eye, Download, Filter } from "lucide-react";
 
 const Quotations = () => {
@@ -77,9 +78,16 @@ const Quotations = () => {
     }
   };
 
+  const mockUser = {
+    name: "John Doe",
+    email: "john@example.com",
+    avatar: ""
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <ProfileSidebar user={mockUser} />
       <div className="container mx-auto px-4 pt-24 pb-16">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">

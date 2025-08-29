@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import ProfileSidebar from "@/components/ProfileSidebar";
 import { Search, Send, MoreVertical } from "lucide-react";
 
 const Chat = () => {
@@ -34,9 +35,16 @@ const Chat = () => {
     }
   };
 
+  const mockUser = {
+    name: "Chat User",
+    email: "user@example.com",
+    avatar: ""
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <ProfileSidebar user={mockUser} hideButton={true} />
       <div className="container mx-auto px-4 pt-24 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[70vh]">
           {/* Users List */}

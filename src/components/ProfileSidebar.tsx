@@ -21,7 +21,11 @@ interface ProfileSidebarProps {
   };
 }
 
-const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
+interface ProfileSidebarExtendedProps extends ProfileSidebarProps {
+  hideButton?: boolean;
+}
+
+const ProfileSidebar = ({ user, hideButton = false }: ProfileSidebarExtendedProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
@@ -54,14 +58,16 @@ const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-        </Button>
-      </SheetTrigger>
+      {!hideButton && (
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </SheetTrigger>
+      )}
       
       <SheetContent 
         side="left" 
