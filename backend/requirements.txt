@@ -1,0 +1,11 @@
+django
+djangorestframework
+django-cors-headers
+django-allauth
+requests
+requests-oauthlib
+PyJWT
+python3-openid
+cryptography
+gunicorn
+whitenoise

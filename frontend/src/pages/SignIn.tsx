@@ -26,10 +26,13 @@ const SignIn = () => {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full gap-2"
-            onClick={() => console.log("Google sign in")}
+            onClick={() => {
+              const apiUrl = import.meta.env.VITE_API_URL;
+              window.location.href = `${apiUrl}/accounts/google/login/?process=login`;
+            }}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
