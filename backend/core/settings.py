@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Local apps
     "accounts",
+    "api",
     # Third-party apps
     "rest_framework",
     "corsheaders",
@@ -99,8 +101,13 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# CORS settings - Allow all for development
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+
+if 'VERCEL_URL' in os.environ:
+    CORS_ALLOWED_ORIGINS.append(f"https://{os.environ['VERCEL_URL']}")
 
 ROOT_URLCONF = "core.urls"
 
@@ -126,10 +133,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 

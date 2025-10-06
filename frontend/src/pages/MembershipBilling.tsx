@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,21 @@ import { Check, CreditCard, Calendar, Download } from "lucide-react";
 
 const MembershipBilling = () => {
   const [currentPlan] = useState("BOOST LITE");
+  const [backendMessage, setBackendMessage] = useState("");
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/membership-billing/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => setBackendMessage(data.message))
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const membershipPlans = [
     {
@@ -84,6 +99,7 @@ const MembershipBilling = () => {
       <Navigation />
       <ProfileSidebar user={mockUser} />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         {/* Current Membership */}
         <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 mb-8">
           <CardHeader>

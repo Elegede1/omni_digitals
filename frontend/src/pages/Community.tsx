@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,50 +13,31 @@ import { Search, Heart, MessageCircle, Share } from "lucide-react";
 const Community = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [newQuestion, setNewQuestion] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [backendMessage, setBackendMessage] = useState("");
 
-  const posts = [
-    {
-      id: 1,
-      author: "Golanginja",
-      avatar: "/placeholder.svg",
-      title: "How to patch KDE on FreeBSD?",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquam mauris neque ut magna quis magna ut sit nulla.",
-      tags: ["golang", "java", "apache"],
-      likes: 156,
-      comments: 12,
-      shares: 8,
-      timeAgo: "2h ago"
-    },
-    {
-      id: 2,
-      author: "Linuxdid",
-      avatar: "/placeholder.svg",
-      title: "What is a difference between Java nad JavaScript?",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Blanditiis vitae etiam lacus quis nulla.",
-      tags: ["java", "javascript", "web"],
-      likes: 103,
-      comments: 5,
-      shares: 3,
-      timeAgo: "4h ago"
-    },
-    {
-      id: 3,
-      author: "Golanginja",
-      avatar: "/placeholder.svg",
-      title: "How to patch KDE on FreeBSD?",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consequat aliquam mauris neque ut magna quis magna ut sit nulla.",
-      tags: ["golang", "java", "apache"],
-      likes: 89,
-      comments: 7,
-      shares: 2,
-      timeAgo: "6h ago"
-    }
-  ];
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/community/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+          setBackendMessage(data.message)
+          if(data.posts) setPosts(data.posts)
+      })
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className="lg:w-1/4 space-y-6">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,21 @@ import { Link } from "react-router-dom";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [backendMessage, setBackendMessage] = useState("");
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/signin/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => setBackendMessage(data.message))
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +37,7 @@ const SignIn = () => {
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold text-foreground">Welcome back</CardTitle>
           <p className="text-muted-foreground">
-            Enter your credentials to access your account
+            {backendMessage || "Enter your credentials to access your account"}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -62,38 +77,44 @@ const SignIn = () => {
               <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              className="bg-background border-border/50 focus:border-primary"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-foreground">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              className="bg-background border-border/50 focus:border-primary"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="remember" className="rounded" />
-              <Label htmlFor="remember" className="text-sm text-muted-foreground">
-                Remember me
-              </Label>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                className="bg-background border-border/50 focus:border-primary"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-            <Link to="#" className="text-sm text-primary hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            Sign In
-          </Button>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                className="bg-background border-border/50 focus:border-primary"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="remember" className="rounded" />
+                <Label htmlFor="remember" className="text-sm text-muted-foreground">
+                  Remember me
+                </Label>
+              </div>
+              <Link to="#" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4">
+              Sign In
+            </Button>
+          </form>
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}

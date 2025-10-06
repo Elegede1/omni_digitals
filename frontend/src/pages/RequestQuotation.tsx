@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,21 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const RequestQuotation = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [backendMessage, setBackendMessage] = useState("");
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/request-quotation/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => setBackendMessage(data.message))
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const serviceCategories = [
     {
@@ -69,6 +84,7 @@ const RequestQuotation = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Service Categories */}
           <div className="lg:col-span-1 space-y-4">

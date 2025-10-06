@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,21 +12,27 @@ import { Search, Send, MoreVertical } from "lucide-react";
 const Chat = () => {
   const [message, setMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState("Esther Howard");
+  const [users, setUsers] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [backendMessage, setBackendMessage] = useState("");
 
-  const users = [
-    { name: "Esther Howard", company: "Microsoft", time: "1m", avatar: "/placeholder.svg", online: true },
-    { name: "Devon Lane", company: "New Mexico", time: "5m", avatar: "/placeholder.svg", online: false },
-    { name: "Jenny Wilson", company: "", time: "1h", avatar: "/placeholder.svg", online: true },
-    { name: "Annette Black", company: "2464 Royal Ln. Mesa, New...", time: "2h", avatar: "/placeholder.svg", online: false },
-    { name: "Marvin McKinney", company: "Amet minim mollit non...", time: "2d", avatar: "/placeholder.svg", online: false },
-    { name: "Theresa Webb", company: "177", time: "1w", avatar: "/placeholder.svg", online: false },
-  ];
-
-  const messages = [
-    { text: "hi good day can you help me ?", sender: "other", time: "10:30 AM" },
-    { text: "hi good day can you help me ?", sender: "me", time: "10:35 AM" },
-    { text: "Good day to you sir.........", sender: "other", time: "10:40 AM" },
-  ];
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/chat/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+          setBackendMessage(data.message)
+          if(data.users) setUsers(data.users)
+          if(data.messages) setMessages(data.messages)
+      })
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -46,6 +52,7 @@ const Chat = () => {
       <Navigation />
       <ProfileSidebar user={mockUser} hideButton={true} />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[70vh]">
           {/* Users List */}
           <div className="lg:col-span-4 space-y-4">

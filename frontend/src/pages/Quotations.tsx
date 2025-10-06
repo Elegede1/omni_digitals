@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,54 +12,27 @@ import { Eye, Download, Filter } from "lucide-react";
 
 const Quotations = () => {
   const [sortBy, setSortBy] = useState("date");
+  const [quotations, setQuotations] = useState([]);
+  const [backendMessage, setBackendMessage] = useState("");
 
-  const quotations = [
-    {
-      id: "QT-001",
-      service: "Social Media Marketing",
-      package: "Premium",
-      status: "pending",
-      date: "2024-01-15",
-      amount: "$299",
-      duration: "3 months"
-    },
-    {
-      id: "QT-002", 
-      service: "Web Development",
-      package: "Enterprise",
-      status: "approved",
-      date: "2024-01-10",
-      amount: "$2,499",
-      duration: "6 weeks"
-    },
-    {
-      id: "QT-003",
-      service: "Content Creation",
-      package: "Basic",
-      status: "in-review",
-      date: "2024-01-08",
-      amount: "$199",
-      duration: "1 month"
-    },
-    {
-      id: "QT-004",
-      service: "SEO Optimization",
-      package: "Standard",
-      status: "rejected",
-      date: "2024-01-05",
-      amount: "$599",
-      duration: "3 months"
-    },
-    {
-      id: "QT-005",
-      service: "Graphic Design",
-      package: "Premium",
-      status: "completed",
-      date: "2024-01-01",
-      amount: "$399",
-      duration: "2 weeks"
-    }
-  ];
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/quotation/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setBackendMessage(data.message)
+        if(data.quotations) {
+            setQuotations(data.quotations)
+        }
+      })
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -89,6 +62,7 @@ const Quotations = () => {
       <Navigation />
       <ProfileSidebar user={mockUser} />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>

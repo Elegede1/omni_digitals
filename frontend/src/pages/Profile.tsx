@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +15,36 @@ import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDas
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: "Jenny Wilson",
-    email: "mehrabdotsoftbusiness@gmail.com",
-    phone: "58077.79",
-    whatsapp: "58077.79",
-    telegram: "58077.79",
-    businessName: "33062 Zboncak Isle",
-    city: "Mehrab",
-    state: "Boorang",
+    fullName: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    telegram: "",
+    businessName: "",
+    city: "",
+    state: "",
   });
+  const [backendMessage, setBackendMessage] = useState("");
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/profile/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setBackendMessage(data.message)
+        // Assuming the backend returns the profile data in a 'profile' object
+        if(data.profile) {
+          setProfileData(data.profile)
+        }
+      })
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -54,6 +75,7 @@ const Profile = () => {
       </div>
       
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block lg:w-1/4 space-y-6">
@@ -64,7 +86,7 @@ const Profile = () => {
                   <AvatarFallback>JW</AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-lg font-semibold text-foreground">
-                  Jenny Wilson
+                  {profileData.fullName || 'Jenny Wilson'}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">Member</p>
               </CardHeader>

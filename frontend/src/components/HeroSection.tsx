@@ -34,9 +34,9 @@ const HeroSection = () => {
               <Button 
                 variant="outline" 
                 size="lg"
-                className="border-primary text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105 group"
+                className="border-primary text-primary transition-all duration-300 group"
               >
-                <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                <Play className="mr-2 h-5 w-5 transition-transform" />
                 Watch Demo
               </Button>
             </div>

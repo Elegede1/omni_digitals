@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,38 +9,42 @@ import ProfileSidebar from "@/components/ProfileSidebar";
 import { TrendingUp, Eye, BarChart3 } from "lucide-react";
 
 const Dashboard = () => {
-  const orderData = [
-    { type: "One month google ads", start: "Jul 16, 2021", end: "Jul 16, 2021", status: "active", performance: "200 web clicks", action: "view report" },
-    { type: "1k telegram members", start: "Jun 16, 2021", end: "Jun 16, 2021", status: "cancelled", performance: "1k members", action: "restart" },
-    { type: "3 page web redesign", start: "May 16, 2021", end: "May 16, 2021", status: "completed", performance: "0 page done", action: "view link" },
-    { type: "1 content post", start: "Apr 16, 2021", end: "Apr 16, 2021", status: "in process", performance: "1 post done", action: "read post" }
-  ];
+  const [orderData, setOrderData] = useState([]);
+  const [benefits, setBenefits] = useState([]);
+  const [user, setUser] = useState({ name: "", email: "", avatar: "" });
+  const [backendMessage, setBackendMessage] = useState("");
 
-  const benefits = [
-    { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" },
-    { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" },
-    { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" },
-    { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" },
-    { quote: "thgfbelt", type: "thgfbelt", services: "XX", package: "mn", date: "mn", status: "mn", action: "thgpo" }
-  ];
-
-  const mockUser = {
-    name: "Ebuka",
-    email: "ebuka@example.com",
-    avatar: ""
-  };
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/dashboard/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setBackendMessage(data.message);
+        if (data.orderData) setOrderData(data.orderData);
+        if (data.benefits) setBenefits(data.benefits);
+        if (data.user) setUser(data.user);
+      })
+      .catch((error) =>
+        setBackendMessage(`Failed to connect to backend: ${error.message}`)
+      );
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <ProfileSidebar user={mockUser} />
+      <ProfileSidebar user={user} />
       <div className="container mx-auto px-4 pt-24 pb-16">
+        <p className="my-4 text-center text-green-500">{backendMessage}</p>
         {/* Welcome Section */}
         <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 mb-8">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-primary mb-2">Welcome back ! Ebuka</h1>
+                <h1 className="text-2xl font-bold text-primary mb-2">Welcome back ! {user.name}</h1>
                 <p className="text-muted-foreground">Your current membership: Boost Elite</p>
                 <p className="text-muted-foreground">Next renewal: March 10, 2025</p>
               </div>

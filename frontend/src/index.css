@@ -114,3 +114,16 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Custom button variant for a glowing effect on hover */
+  .btn-secondary-glow {
+    @apply bg-transparent border-primary text-primary;
+  }
+
+  .btn-secondary-glow:hover {
+    @apply bg-primary text-primary-foreground;
+    box-shadow: var(--shadow-glow);
+    transition: all 0.3s ease-in-out;
+  }
+}
