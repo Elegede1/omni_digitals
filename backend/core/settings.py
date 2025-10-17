@@ -77,12 +77,15 @@ AUTHENTICATION_BACKENDS = [
 # Set SITE_ID for django-allauth
 SITE_ID = 1
 
-# Configure django-allauth
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+# Django-allauth configuration for email-only authentication
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+
 
 # Google social login configuration
 SOCIALACCOUNT_PROVIDERS = {
