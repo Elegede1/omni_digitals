@@ -135,13 +135,23 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        # Fallback to a local sqlite database if a DATABASE_URL is not found
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
-}
+# If the `DATABASE_URL` environment variable is set, use it to configure the database.
+# Otherwise, default to a local SQLite database for development.
+if 'DATABASE_URL' in os.environ and os.environ['DATABASE_URL']:
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            # Render requires SSL connections for PostgreSQL databases.
+            ssl_require='RENDER' in os.environ
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation

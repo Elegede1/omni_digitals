@@ -149,4 +149,4 @@ jules-scratch/
 frontend/.env.*
 
 # Ignore build artifacts
-frontend/dist/
+frontend/dist/.idea/ 
