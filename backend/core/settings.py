@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
-from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,6 +73,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
 
 # Set SITE_ID for django-allauth
 SITE_ID = 1
@@ -138,24 +139,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # If the `DATABASE_URL` environment variable is set, use it to configure the database.
 # Otherwise, default to a local SQLite database for development.
-if 'DATABASE_URL' in os.environ and os.environ.get('DATABASE_URL'):
+if 'DATABASE_URL' in os.environ and os.environ['DATABASE_URL']:
     DATABASES = {
         'default': dj_database_url.config(
-            # conn_max_age ensures that database connections are not kept open indefinitely.
             conn_max_age=600,
-            # Supabase and Render require SSL connections.
-            ssl_require=True
+            # Render requires SSL connections for PostgreSQL databases.
+            ssl_require='RENDER' in os.environ
         )
     }
-    # Verify that the database name is present in the configuration.
-    if not DATABASES['default'].get('NAME'):
-        raise ImproperlyConfigured(
-            "The database NAME is missing from the database configuration. "
-            "Please ensure the DATABASE_URL environment variable is set correctly, "
-            "e.g., 'postgres://USER:PASSWORD@HOST:PORT/NAME'."
-        )
 else:
-    # Fallback to a local SQLite database for development if DATABASE_URL is not set.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -201,6 +193,10 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
