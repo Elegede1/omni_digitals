@@ -109,10 +109,8 @@ SOCIALACCOUNT_PROVIDERS = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://omni-digitals-mhbd6pv6l-jekuthiels-projects.vercel.app',
 ]
-
-if 'VERCEL_URL' in os.environ:
-    CORS_ALLOWED_ORIGINS.append(f"https://{os.environ['VERCEL_URL']}")
 
 ROOT_URLCONF = "core.urls"
 
