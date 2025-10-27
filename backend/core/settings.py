@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import re
 import dj_database_url
 from pathlib import Path
 
@@ -30,7 +31,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'omni-digitals-ao59k4mj5-jekuthiels-projects.vercel.app',
+    # Allow any Vercel deployment subdomain for your project
+    '.jekuthiels-projects.vercel.app',
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_URL')
@@ -110,11 +112,28 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# CORS settings
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://omni-digitals-mhbd6pv6l-jekuthiels-projects.vercel.app',
 ]
+
+# Allow any Vercel deployment URL for your project via regex
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://omni-digitals-.*-jekuthiels-projects\.vercel\.app$",
+]
+
+# CSRF settings for trusting Vercel subdomains
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://*.jekuthiels-projects.vercel.app',
+]
+
+# Add the Render URL to trusted origins if it exists
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
 
 ROOT_URLCONF = "core.urls"
 
