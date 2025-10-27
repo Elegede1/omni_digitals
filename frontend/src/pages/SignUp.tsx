@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 
 const SignUp = () => {
@@ -16,8 +16,22 @@ const SignUp = () => {
     confirmPassword: "",
   });
   const [backendMessage, setBackendMessage] = useState("");
+  const location = useLocation();
 
   useEffect(() => {
+    // Check for the redirect error from the backend
+    const queryParams = new URLSearchParams(location.search);
+    const error = queryParams.get("error");
+    const email = queryParams.get("email");
+
+    if (error === "not_registered" && email) {
+      alert(
+        `The email ${email} is not registered. Please sign up first using the Google button below or by filling out the form.`
+      );
+      // Optionally, pre-fill the email field
+      setFormData((prev) => ({ ...prev, email }));
+    }
+
     fetch("http://127.0.0.1:8000/api/signup/")
       .then((response) => {
         if (!response.ok) {
@@ -29,7 +43,7 @@ const SignUp = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [location]); // Add 'location' to the dependency array
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -61,7 +75,8 @@ const SignUp = () => {
               className="w-full gap-2"
               onClick={() => {
                 const apiUrl = import.meta.env.VITE_API_URL;
-                window.location.href = `${apiUrl}/accounts/google/login/?process=login`;
+                // Use 'signup' process for the Google button on the signup page
+                window.location.href = `${apiUrl}/accounts/google/login/?process=signup`;
               }}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -85,14 +85,19 @@ AUTH_USER_MODEL = 'accounts.User'
 # Set SITE_ID for django-allauth
 SITE_ID = 1
 
-# Django-allauth configuration for email-only authentication
+# Django-allauth configuration
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_ADAPTER = "allauth.socialaccount.adapter.DefaultSocialAccountAdapter"
+
+# Use our custom adapter
+SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
+
+# Frontend URL for redirects
+FRONTEND_SIGNUP_URL = os.environ.get('FRONTEND_SIGNUP_URL', 'http://localhost:5173/signup')
 
 
 # Google social login configuration
