@@ -31,8 +31,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    # Allow any Vercel deployment subdomain for your project
-    '.jekuthiels-projects.vercel.app',
+    # Allow any vercel.app subdomain
+    '.vercel.app',
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_URL')
@@ -125,14 +125,14 @@ CORS_ALLOWED_ORIGINS = [
 
 # Allow any Vercel deployment URL for your project via regex
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://omni-digitals-.*-jekuthiels-projects\.vercel\.app$",
+    r"^https://.*\.vercel\.app$",
 ]
 
 # CSRF settings for trusting Vercel subdomains
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://*.jekuthiels-projects.vercel.app',
+    'https://*.vercel.app',
 ]
 
 # Add the Render URL to trusted origins if it exists
@@ -177,7 +177,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3d',
         }
     }
 
