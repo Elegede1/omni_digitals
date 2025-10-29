@@ -31,8 +31,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    # Allow any vercel.app subdomain
-    '.vercel.app',
+    'omni-digitals.onrender.com', # Explicitly add your Render domain
+    '.vercel.app', # Allow any Vercel deployment subdomain
 ]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_URL')
@@ -177,7 +177,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3d',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
