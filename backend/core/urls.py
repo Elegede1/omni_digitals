@@ -19,8 +19,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+# Health check view for Render
+def health_check(request):
+    return JsonResponse({"status": "ok", "message": "Backend is healthy"})
 
 urlpatterns = [
+    path("", health_check, name="health_check"),  # Health check for root URL
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("api/", include("api.urls")),

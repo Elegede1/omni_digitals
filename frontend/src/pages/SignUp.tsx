@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 
 const SignUp = () => {
@@ -16,36 +16,9 @@ const SignUp = () => {
     confirmPassword: "",
   });
   const [backendMessage, setBackendMessage] = useState("");
-  const location = useLocation();
+  const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
-
-  useEffect(() => {
-    // Check for the redirect error from the backend
-    const queryParams = new URLSearchParams(location.search);
-    const error = queryParams.get("error");
-    const email = queryParams.get("email");
-
-    if (error === "not_registered" && email) {
-      alert(
-        `The email ${email} is not registered. Please sign up first using the Google button below or by filling out the form.`
-      );
-      // Optionally, pre-fill the email field
-      setFormData((prev) => ({ ...prev, email }));
-    }
-
-    fetch(`${backendUrl}/api/signup/`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => setBackendMessage(data.message))
-      .catch((error) =>
-        setBackendMessage(`Failed to connect to backend: ${error.message}`)
-      );
-  }, [location, backendUrl]); // Add 'location' and 'backendUrl' to the dependency array
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -56,11 +29,13 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBackendMessage(""); // Clear previous messages
+
     if (formData.password !== formData.confirmPassword) {
-      // Or use a more user-friendly way to show the error
-      alert("Passwords do not match!");
+      setBackendMessage("Passwords do not match!");
       return;
     }
+
     try {
       const response = await fetch(`${backendUrl}/api/signup/`, {
         method: "POST",
@@ -80,14 +55,13 @@ const SignUp = () => {
 
       if (response.ok) {
         console.log("Sign up successful:", data);
-        // Here you might want to redirect the user to the sign-in page
-        // or automatically sign them in.
-        // For now, just logging to console.
+        // Redirect to the sign-in page after successful registration
+        navigate("/signin");
       } else {
         console.error("Sign up failed:", data);
-        // Here you would typically display error messages to the user
-        // e.g., email already exists, password too weak, etc.
-        setBackendMessage(JSON.stringify(data)); // Show backend error
+        // Flatten and display backend error messages
+        const errorMessage = Object.values(data).flat().join(' ');
+        setBackendMessage(errorMessage || "Sign up failed. Please check your details.");
       }
     } catch (error) {
       console.error("An error occurred during sign up:", error);
@@ -103,15 +77,15 @@ const SignUp = () => {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-foreground">Create Account</CardTitle>
             <p className="text-muted-foreground">
-              {backendMessage || "Join our community to boost your digital presence"}
+              Join our community to boost your digital presence
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
+            {backendMessage && <p className="text-center text-red-500">{backendMessage}</p>}
             <Button
               variant="outline"
               className="w-full gap-2"
               onClick={() => {
-                // Use 'signup' process for the Google button on the signup page
                 window.location.href = `${backendUrl}/accounts/google/login/?process=signup`;
               }}
             >

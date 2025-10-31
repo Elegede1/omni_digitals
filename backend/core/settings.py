@@ -118,9 +118,14 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # CORS settings
+# WARNING: This is for debugging ONLY.
+# For production, set this to False and use CORS_ALLOWED_ORIGINS.
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app', # Your Vercel Preview URL
 ]
 
 # Allow any Vercel deployment URL for your project via regex
@@ -133,6 +138,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://*.vercel.app',
+    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app', # Your Vercel Preview URL
 ]
 
 # Add the Render URL to trusted origins if it exists

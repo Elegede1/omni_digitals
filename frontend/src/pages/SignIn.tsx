@@ -1,35 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [backendMessage, setBackendMessage] = useState("");
+  const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
-  useEffect(() => {
-    fetch(`${backendUrl}/api/signin/`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => setBackendMessage(data.message))
-      .catch((error) =>
-        setBackendMessage(`Failed to connect to backend: ${error.message}`)
-      );
-  }, [backendUrl]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBackendMessage(""); // Clear previous messages
+
     try {
       const response = await fetch(`${backendUrl}/api/signin/`, {
         method: "POST",
@@ -43,12 +32,12 @@ const SignIn = () => {
 
       if (response.ok) {
         console.log("Sign in successful:", data);
-        // Here you would typically save the auth token and redirect the user
-        // For example: localStorage.setItem('token', data.token);
-        // window.location.href = '/dashboard';
+        // Save the auth token and redirect the user
+        localStorage.setItem('token', data.token); // Example
+        navigate('/dashboard'); // Redirect to dashboard on success
       } else {
         console.error("Sign in failed:", data);
-        setBackendMessage(data.error || "Invalid credentials");
+        setBackendMessage(data.error || "Invalid credentials. Please try again.");
       }
     } catch (error) {
       console.error("An error occurred during sign in:", error);
@@ -64,10 +53,11 @@ const SignIn = () => {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-foreground">Welcome back</CardTitle>
             <p className="text-muted-foreground">
-              {backendMessage || "Enter your credentials to access your account"}
+              Enter your credentials to access your account
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
+            {backendMessage && <p className="text-center text-red-500">{backendMessage}</p>}
             <Button
               variant="outline"
               className="w-full gap-2"
