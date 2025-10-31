@@ -9,7 +9,7 @@ from .views import (
     signup,
     chat,
     community,
-    dashboard,
+    dashboard_data, # Changed from dashboard to dashboard_data
 )
 
 urlpatterns = [
@@ -22,5 +22,5 @@ urlpatterns = [
     path('signup/', signup, name='signup'),
     path('chat/', chat, name='chat'),
     path('community/', community, name='community'),
-    path('dashboard/', dashboard, name='dashboard'),
+    path('dashboard/', dashboard_data, name='dashboard'), # Mapped to dashboard_data
 ]

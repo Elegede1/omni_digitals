@@ -12,8 +12,10 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [backendMessage, setBackendMessage] = useState("");
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/signin/")
+    fetch(`${backendUrl}/api/signin/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -24,12 +26,34 @@ const SignIn = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign in logic here
-    console.log("Sign in attempt:", { email, password });
+    try {
+      const response = await fetch(`${backendUrl}/api/signin/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Sign in successful:", data);
+        // Here you would typically save the auth token and redirect the user
+        // For example: localStorage.setItem('token', data.token);
+        // window.location.href = '/dashboard';
+      } else {
+        console.error("Sign in failed:", data);
+        setBackendMessage(data.error || "Invalid credentials");
+      }
+    } catch (error) {
+      console.error("An error occurred during sign in:", error);
+      setBackendMessage("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -48,8 +72,7 @@ const SignIn = () => {
               variant="outline"
               className="w-full gap-2"
               onClick={() => {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                window.location.href = `${apiUrl}/accounts/google/login/?process=login`;
+                window.location.href = `${backendUrl}/accounts/google/login/?process=login`;
               }}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

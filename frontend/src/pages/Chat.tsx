@@ -16,8 +16,10 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [backendMessage, setBackendMessage] = useState("");
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/chat/")
+    fetch(`${backendUrl}/api/chat/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -32,12 +34,49 @@ const Chat = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl]);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // Handle sending message
-      setMessage("");
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
+
+    const newMessage = {
+      text: message,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      sender: 'me', // Optimistic update
+    };
+
+    // Optimistically update the UI
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setMessage("");
+
+    try {
+      const response = await fetch(`${backendUrl}/api/chat/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include auth headers if required
+        },
+        body: JSON.stringify({ message: message, recipient: selectedUser })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const actualMessage = await response.json();
+      
+      // Replace the optimistic message with the one from the server
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg === newMessage ? actualMessage : msg
+        )
+      );
+
+    } catch (error) {
+      console.error("Error sending message:", error);
+      // Revert the optimistic update on error
+      setMessages(prevMessages => prevMessages.filter(msg => msg !== newMessage));
+      setBackendMessage("Failed to send message. Please try again.");
     }
   };
 

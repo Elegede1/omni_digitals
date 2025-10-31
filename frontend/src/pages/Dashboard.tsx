@@ -7,17 +7,25 @@ import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { TrendingUp, Eye, BarChart3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [orderData, setOrderData] = useState([]);
   const [benefits, setBenefits] = useState([]);
   const [user, setUser] = useState({ name: "", email: "", avatar: "" });
   const [backendMessage, setBackendMessage] = useState("");
+  const navigate = useNavigate();
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/dashboard/")
+    // TODO: Add authentication headers
+    fetch(`${backendUrl}/api/dashboard/`)
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate("/signin"); // Redirect to signin if not authenticated
+          }
           throw new Error("Network response was not ok");
         }
         return response.json();
@@ -31,7 +39,7 @@ const Dashboard = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

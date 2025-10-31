@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
@@ -14,11 +14,18 @@ const Quotations = () => {
   const [sortBy, setSortBy] = useState("date");
   const [quotations, setQuotations] = useState([]);
   const [backendMessage, setBackendMessage] = useState("");
+  const navigate = useNavigate();
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/quotation/")
+    // TODO: Add authentication headers
+    fetch(`${backendUrl}/api/quotation/`)
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate("/signin"); // Redirect to signin if not authenticated
+          }
           throw new Error("Network response was not ok");
         }
         return response.json();
@@ -32,7 +39,17 @@ const Quotations = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl, navigate]);
+
+  const handleViewQuotation = (quotationId) => {
+    // Logic to view quotation, maybe open a modal or a new page
+    console.log("Viewing quotation:", quotationId);
+  };
+
+  const handleDownloadQuotation = (quotationId) => {
+    // Logic to download quotation PDF
+    window.open(`${backendUrl}/api/quotation/${quotationId}/download/`, '_blank');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -161,10 +178,10 @@ const Quotations = () => {
                       </td>
                       <td className="py-4">
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
+                          <Button onClick={() => handleViewQuotation(quote.id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
+                          <Button onClick={() => handleDownloadQuotation(quote.id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>

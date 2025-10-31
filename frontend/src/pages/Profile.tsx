@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
@@ -25,18 +25,24 @@ const Profile = () => {
     state: "",
   });
   const [backendMessage, setBackendMessage] = useState("");
+  const navigate = useNavigate();
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/profile/")
+    // TODO: Add authentication headers
+    fetch(`${backendUrl}/api/profile/`)
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate("/signin"); // Redirect to signin if not authenticated
+          }
           throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
         setBackendMessage(data.message)
-        // Assuming the backend returns the profile data in a 'profile' object
         if(data.profile) {
           setProfileData(data.profile)
         }
@@ -44,7 +50,7 @@ const Profile = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -53,10 +59,37 @@ const Profile = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsEditing(false);
-    // Handle save logic here
-    console.log("Saving profile data:", profileData);
+    try {
+      const response = await fetch(`${backendUrl}/api/profile/`, {
+        method: 'POST', // Or PUT/PATCH
+        headers: {
+          'Content-Type': 'application/json',
+          // TODO: Add authentication headers (e.g., Authorization: `Bearer ${token}`)
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile data');
+      }
+
+      const data = await response.json();
+      setBackendMessage(data.message || "Profile updated successfully!");
+
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      setBackendMessage("Failed to save profile. Please try again.");
+      // Optionally revert changes if save fails
+    }
+  };
+
+  const handleSignOut = () => {
+    // Basic sign out: clear token and redirect
+    // You might have a more complex logic (e.g., calling a backend endpoint)
+    localStorage.removeItem('token'); // Example: clear auth token
+    navigate('/signin');
   };
 
   const currentUser = {
@@ -122,7 +155,7 @@ const Profile = () => {
                     Message
                   </Button>
                 </Link>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>

@@ -18,6 +18,8 @@ const SignUp = () => {
   const [backendMessage, setBackendMessage] = useState("");
   const location = useLocation();
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
   useEffect(() => {
     // Check for the redirect error from the backend
     const queryParams = new URLSearchParams(location.search);
@@ -32,7 +34,7 @@ const SignUp = () => {
       setFormData((prev) => ({ ...prev, email }));
     }
 
-    fetch("http://127.0.0.1:8000/api/signup/")
+    fetch(`${backendUrl}/api/signup/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -43,7 +45,7 @@ const SignUp = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, [location]); // Add 'location' to the dependency array
+  }, [location, backendUrl]); // Add 'location' and 'backendUrl' to the dependency array
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -52,10 +54,45 @@ const SignUp = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign up logic here
-    console.log("Sign up attempt:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      // Or use a more user-friendly way to show the error
+      alert("Passwords do not match!");
+      return;
+    }
+    try {
+      const response = await fetch(`${backendUrl}/api/signup/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          password2: formData.confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Sign up successful:", data);
+        // Here you might want to redirect the user to the sign-in page
+        // or automatically sign them in.
+        // For now, just logging to console.
+      } else {
+        console.error("Sign up failed:", data);
+        // Here you would typically display error messages to the user
+        // e.g., email already exists, password too weak, etc.
+        setBackendMessage(JSON.stringify(data)); // Show backend error
+      }
+    } catch (error) {
+      console.error("An error occurred during sign up:", error);
+      setBackendMessage("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -74,9 +111,8 @@ const SignUp = () => {
               variant="outline"
               className="w-full gap-2"
               onClick={() => {
-                const apiUrl = import.meta.env.VITE_API_URL;
                 // Use 'signup' process for the Google button on the signup page
-                window.location.href = `${apiUrl}/accounts/google/login/?process=signup`;
+                window.location.href = `${backendUrl}/accounts/google/login/?process=signup`;
               }}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

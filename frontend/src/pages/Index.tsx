@@ -12,10 +12,10 @@ const Index = () => {
 
   useEffect(() => {
     // Use an environment variable for the API URL
-    const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
     // Fetch data from the Django backend's health check endpoint
-    fetch(`${apiUrl}/api/health/`)
+    fetch(`${backendUrl}/api/health/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

@@ -12,12 +12,15 @@ import { Search, Heart, MessageCircle, Share } from "lucide-react";
 
 const Community = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [newQuestion, setNewQuestion] = useState("");
+  const [newQuestionTitle, setNewQuestionTitle] = useState("");
+  const [newQuestionContent, setNewQuestionContent] = useState("");
   const [posts, setPosts] = useState([]);
   const [backendMessage, setBackendMessage] = useState("");
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/community/")
+    fetch(`${backendUrl}/api/community/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -31,7 +34,57 @@ const Community = () => {
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, []);
+  }, [backendUrl]);
+
+  const handlePublish = async () => {
+    if (!newQuestionTitle.trim() || !newQuestionContent.trim()) return;
+
+    try {
+      const response = await fetch(`${backendUrl}/api/community/posts/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add auth headers if required
+        },
+        body: JSON.stringify({ title: newQuestionTitle, content: newQuestionContent }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to publish question');
+      }
+
+      const newPost = await response.json();
+      setPosts(prevPosts => [newPost, ...prevPosts]);
+      setNewQuestionTitle("");
+      setNewQuestionContent("");
+      setBackendMessage("Question published successfully!");
+
+    } catch (error) {
+      console.error("Error publishing question:", error);
+      setBackendMessage("Failed to publish question. Please try again.");
+    }
+  };
+
+  const handlePostAction = async (postId, action) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/community/posts/${postId}/${action}/`, {
+        method: 'POST',
+        headers: {
+          // Add auth headers if required
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} post`);
+      }
+
+      const updatedPost = await response.json();
+      setPosts(posts.map(p => p.id === postId ? updatedPost : p));
+
+    } catch (error) {
+      console.error(`Error on ${action} post:`, error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,12 +196,14 @@ const Community = () => {
                 <div className="space-y-4">
                   <Input
                     placeholder="Question"
+                    value={newQuestionTitle}
+                    onChange={(e) => setNewQuestionTitle(e.target.value)}
                     className="bg-background border-border/50 focus:border-primary"
                   />
                   <Textarea
                     placeholder="Describe your question"
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
+                    value={newQuestionContent}
+                    onChange={(e) => setNewQuestionContent(e.target.value)}
                     className="bg-background border-border/50 focus:border-primary min-h-[100px]"
                   />
                   <div className="flex justify-between items-center">
@@ -157,7 +212,7 @@ const Community = () => {
                         Categories
                       </Button>
                     </div>
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Button onClick={handlePublish} className="bg-primary text-primary-foreground hover:bg-primary/90">
                       Publish
                     </Button>
                   </div>
@@ -196,15 +251,15 @@ const Community = () => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                          <button onClick={() => handlePostAction(post.id, 'like')} className="flex items-center space-x-1 hover:text-primary transition-colors">
                             <Heart className="h-4 w-4" />
                             <span>{post.likes}</span>
                           </button>
-                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                          <button onClick={() => handlePostAction(post.id, 'comment')} className="flex items-center space-x-1 hover:text-primary transition-colors">
                             <MessageCircle className="h-4 w-4" />
                             <span>{post.comments}</span>
                           </button>
-                          <button className="flex items-center space-x-1 hover:text-primary transition-colors">
+                          <button onClick={() => handlePostAction(post.id, 'share')} className="flex items-center space-x-1 hover:text-primary transition-colors">
                             <Share className="h-4 w-4" />
                             <span>{post.shares}</span>
                           </button>
