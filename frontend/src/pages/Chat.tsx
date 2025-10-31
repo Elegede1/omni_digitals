@@ -17,7 +17,8 @@ const Chat = () => {
   const [backendMessage, setBackendMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/chat/")
+    const apiUrl = import.meta.env.VITE_API_URL;
+    fetch(`${apiUrl}/api/chat/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

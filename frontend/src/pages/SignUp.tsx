@@ -32,7 +32,8 @@ const SignUp = () => {
       setFormData((prev) => ({ ...prev, email }));
     }
 
-    fetch("http://127.0.0.1:8000/api/signup/")
+    const apiUrl = import.meta.env.VITE_API_URL;
+    fetch(`${apiUrl}/api/signup/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

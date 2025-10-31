@@ -13,7 +13,8 @@ const SignIn = () => {
   const [backendMessage, setBackendMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/signin/")
+    const apiUrl = import.meta.env.VITE_API_URL;
+    fetch(`${apiUrl}/api/signin/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

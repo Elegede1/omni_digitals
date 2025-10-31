@@ -12,7 +12,7 @@ const Index = () => {
 
   useEffect(() => {
     // Use an environment variable for the API URL
-    const apiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     // Fetch data from the Django backend's health check endpoint
     fetch(`${apiUrl}/api/health/`)
