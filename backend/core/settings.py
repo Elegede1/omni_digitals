@@ -95,8 +95,8 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-# Use our custom adapter for social accounts
-SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
+# Use our custom adapter for social accounts (Temporarily Disabled for debugging)
+# SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
 
 # Frontend URL for redirects
 FRONTEND_SIGNUP_URL = os.environ.get('FRONTEND_SIGNUP_URL', 'http://localhost:5173/signup')
