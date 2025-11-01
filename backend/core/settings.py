@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites", # Required by allauth
     # Local apps
     "accounts",
     "api",
@@ -86,6 +87,7 @@ AUTH_USER_MODEL = 'accounts.User'
 SITE_ID = 1
 
 # Django-allauth configuration
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -93,7 +95,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-# Use our custom adapter
+# Use our custom adapter for social accounts
 SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
 
 # Frontend URL for redirects
@@ -113,35 +115,31 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        }
+        },
+        'SOCIALACCOUNT_AUTO_SIGNUP': True, # Automatically sign up the user
     }
 }
 
 # CORS settings
-# WARNING: This is for debugging ONLY.
-# For production, set this to False and use CORS_ALLOWED_ORIGINS.
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True # For debugging ONLY
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app', # Your Vercel Preview URL
+    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app',
 ]
 
-# Allow any Vercel deployment URL for your project via regex
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
 ]
 
-# CSRF settings for trusting Vercel subdomains
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://*.vercel.app',
-    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app', # Your Vercel Preview URL
+    'https://omni-digitals-h84iuzd6f-jekuthiels-projects.vercel.app',
 ]
 
-# Add the Render URL to trusted origins if it exists
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 
@@ -167,15 +165,10 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# If the `DATABASE_URL` environment variable is set, use it to configure the database.
-# Otherwise, default to a local SQLite database for development.
 if 'DATABASE_URL' in os.environ and os.environ['DATABASE_URL']:
     DATABASES = {
         'default': dj_database_url.config(
             conn_max_age=600,
-            # Render requires SSL connections for PostgreSQL databases.
             ssl_require='RENDER' in os.environ
         )
     }
@@ -189,8 +182,6 @@ else:
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -208,20 +199,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -229,8 +213,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
