@@ -14,6 +14,7 @@ import os
 import re
 import dj_database_url
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -103,6 +104,9 @@ FRONTEND_SIGNUP_URL = os.environ.get('FRONTEND_SIGNUP_URL', 'http://localhost:51
 
 
 # Google social login configuration
+if 'GOOGLE_CLIENT_ID' not in os.environ or 'GOOGLE_CLIENT_SECRET' not in os.environ:
+    raise ImproperlyConfigured("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set in the environment.")
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
