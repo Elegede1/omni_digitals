@@ -30,12 +30,21 @@ const Profile = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    // TODO: Add authentication headers
-    fetch(`${backendUrl}/api/profile/`)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    fetch(`${backendUrl}/api/profile/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
-          if (response.status === 401) {
-            navigate("/signin"); // Redirect to signin if not authenticated
+          if (response.status === 401 || response.status === 403) {
+            navigate("/signin");
           }
           throw new Error("Network response was not ok");
         }
@@ -61,12 +70,14 @@ const Profile = () => {
 
   const handleSave = async () => {
     setIsEditing(false);
+    const token = localStorage.getItem('token');
+
     try {
       const response = await fetch(`${backendUrl}/api/profile/`, {
         method: 'POST', // Or PUT/PATCH
         headers: {
           'Content-Type': 'application/json',
-          // TODO: Add authentication headers (e.g., Authorization: `Bearer ${token}`)
+          'Authorization': `Token ${token}`,
         },
         body: JSON.stringify(profileData),
       });
@@ -81,14 +92,12 @@ const Profile = () => {
     } catch (error) {
       console.error("Error saving profile data:", error);
       setBackendMessage("Failed to save profile. Please try again.");
-      // Optionally revert changes if save fails
     }
   };
 
   const handleSignOut = () => {
-    // Basic sign out: clear token and redirect
-    // You might have a more complex logic (e.g., calling a backend endpoint)
-    localStorage.removeItem('token'); // Example: clear auth token
+    localStorage.removeItem('token');
+    localStorage.removeItem('avatar');
     navigate('/signin');
   };
 
@@ -102,7 +111,6 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Profile Sidebar for Mobile */}
       <div className="fixed top-20 left-4 z-50 lg:hidden">
         <ProfileSidebar user={currentUser} />
       </div>
@@ -110,7 +118,6 @@ const Profile = () => {
       <div className="container mx-auto px-4 pt-24 pb-16">
         <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar - Desktop */}
           <div className="hidden lg:block lg:w-1/4 space-y-6">
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardHeader className="text-center">
@@ -163,9 +170,7 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Main Content */}
           <div className="lg:w-3/4 space-y-6">
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
                 <CardContent className="pt-6">
@@ -206,7 +211,6 @@ const Profile = () => {
               </Card>
             </div>
 
-            {/* Profile Information */}
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-xl font-bold text-foreground">

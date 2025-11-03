@@ -27,7 +27,7 @@ const Dashboard = () => {
 
     fetch(`${backendUrl}/api/dashboard/`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Token ${token}`, // Use 'Token' scheme for Django REST Framework
       },
     })
       .then((response) => {
