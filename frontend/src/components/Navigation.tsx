@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, userAvatar, logout } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50 animate-fade-in">
@@ -40,22 +43,36 @@ const Navigation = () => {
             <a href="#works" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Works
             </a>
-            <Link to="/signin">
-              <Button 
-                variant="outline" 
-                className="mr-2 border-primary text-primary hover:bg-primary/10 transition-all duration-300"
-              >
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/signup">
-              <Button 
-                variant="default" 
-                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow hover:shadow-elegant transition-all duration-300 hover:scale-105"
-              >
-                Sign Up
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-9 w-9 cursor-pointer">
+                  <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                <Button onClick={logout} variant="ghost" size="sm">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/signin">
+                  <Button 
+                    variant="outline" 
+                    className="mr-2 border-primary text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button 
+                    variant="default" 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow hover:shadow-elegant transition-all duration-300 hover:scale-105"
+                  >
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -84,22 +101,37 @@ const Navigation = () => {
                 Works
               </a>
               <div className="space-y-2">
-                <Link to="/signin" className="block">
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-primary text-primary hover:bg-primary/10 transition-all duration-300"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/signup" className="block">
-                  <Button 
-                    variant="default" 
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <div className="flex items-center justify-between">
+                     <Avatar className="h-9 w-9 cursor-pointer">
+                       <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                       <AvatarFallback>U</AvatarFallback>
+                     </Avatar>
+                    <Button onClick={logout} variant="ghost" className="w-full justify-start">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/signin" className="block">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-primary text-primary hover:bg-primary/10 transition-all duration-300"
+                      >
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" className="block">
+                      <Button 
+                        variant="default" 
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
+                      >
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
