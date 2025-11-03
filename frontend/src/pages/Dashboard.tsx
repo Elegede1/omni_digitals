@@ -19,12 +19,21 @@ const Dashboard = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    // TODO: Add authentication headers
-    fetch(`${backendUrl}/api/dashboard/`)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    fetch(`${backendUrl}/api/dashboard/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
-          if (response.status === 401) {
-            navigate("/signin"); // Redirect to signin if not authenticated
+          if (response.status === 401 || response.status === 403) {
+            navigate("/signin"); // Redirect if token is invalid or expired
           }
           throw new Error("Network response was not ok");
         }

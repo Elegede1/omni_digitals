@@ -6,12 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [backendMessage, setBackendMessage] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
@@ -32,8 +34,9 @@ const SignIn = () => {
 
       if (response.ok) {
         console.log("Sign in successful:", data);
-        // Save the auth token and redirect the user
-        localStorage.setItem('token', data.token); // Example
+        // Use the login function from AuthContext
+        login(data.avatar_url); // Assuming the backend returns avatar_url
+        localStorage.setItem('token', data.token); // Still need to set the token
         navigate('/dashboard'); // Redirect to dashboard on success
       } else {
         console.error("Sign in failed:", data);
