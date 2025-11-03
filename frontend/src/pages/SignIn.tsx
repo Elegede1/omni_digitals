@@ -34,17 +34,16 @@ const SignIn = () => {
 
       if (response.ok) {
         console.log("Sign in successful:", data);
-        // Use the login function from AuthContext
-        login(data.avatar_url); // Assuming the backend returns avatar_url
-        localStorage.setItem('token', data.token); // Still need to set the token
-        navigate('/dashboard'); // Redirect to dashboard on success
+        localStorage.setItem('token', data.token);
+        login(data.avatar_url);
+        navigate('/dashboard');
       } else {
-        console.error("Sign in failed:", data);
-        setBackendMessage(data.error || "Invalid credentials. Please try again.");
+        // Display the specific error from the backend (e.g., "Invalid credentials")
+        setBackendMessage(data.error || "An unknown error occurred.");
       }
     } catch (error) {
       console.error("An error occurred during sign in:", error);
-      setBackendMessage("An error occurred. Please try again.");
+      setBackendMessage("Failed to connect to the server. Please try again.");
     }
   };
 
@@ -60,7 +59,7 @@ const SignIn = () => {
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {backendMessage && <p className="text-center text-red-500">{backendMessage}</p>}
+            {backendMessage && <p className="text-center text-red-500 font-medium">{backendMessage}</p>}
             <Button
               variant="outline"
               className="w-full gap-2"
