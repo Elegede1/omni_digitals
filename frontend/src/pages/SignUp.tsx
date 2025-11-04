@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import DarkModeToggle from "@/components/DarkModeToggle";
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -19,9 +20,15 @@ const SignUp = () => {
   const [backendMessage, setBackendMessage] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
+  const passwordMatch = useMemo(() => {
+    return formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
+  }, [formData.password, formData.confirmPassword]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -33,7 +40,7 @@ const SignUp = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploadedFile(e.target.files[0]);
-      setSelectedAvatar(""); // Deselect default avatar if file is uploaded
+      setSelectedAvatar("");
     }
   };
 
@@ -41,7 +48,7 @@ const SignUp = () => {
     e.preventDefault();
     setBackendMessage("");
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!passwordMatch) {
       setBackendMessage("Passwords do not match!");
       return;
     }
@@ -51,7 +58,6 @@ const SignUp = () => {
     submissionData.append('last_name', formData.lastName);
     submissionData.append('email', formData.email);
     submissionData.append('password', formData.password);
-    submissionData.append('password2', formData.confirmPassword);
     if (uploadedFile) {
       submissionData.append('profile_picture', uploadedFile);
     } else if (selectedAvatar) {
@@ -61,7 +67,7 @@ const SignUp = () => {
     try {
       const response = await fetch(`${backendUrl}/api/signup/`, {
         method: "POST",
-        body: submissionData, // FormData is sent without Content-Type header
+        body: submissionData,
       });
 
       const data = await response.json();
@@ -95,7 +101,6 @@ const SignUp = () => {
             {backendMessage && <p className="text-center text-red-500">{backendMessage}</p>}
             
             <form onSubmit={handleSubmit}>
-              {/* Avatar Selection */}
               <div className="space-y-2 mb-4">
                 <Label className="text-foreground">Choose an Avatar or Upload a Picture</Label>
                 <div className="flex justify-center items-center gap-4">
@@ -103,14 +108,14 @@ const SignUp = () => {
                     className={`h-20 w-20 cursor-pointer ${selectedAvatar === 'male' ? 'ring-2 ring-primary' : ''}`}
                     onClick={() => { setSelectedAvatar('male'); setUploadedFile(null); }}
                   >
-                    <AvatarImage src="/male-avatar.png" alt="Male Avatar" />
+                    <AvatarImage src="/male-face-avatar.png" alt="Male Avatar" />
                     <AvatarFallback>M</AvatarFallback>
                   </Avatar>
                   <Avatar 
                     className={`h-20 w-20 cursor-pointer ${selectedAvatar === 'female' ? 'ring-2 ring-primary' : ''}`}
                     onClick={() => { setSelectedAvatar('female'); setUploadedFile(null); }}
                   >
-                    <AvatarImage src="/female-avatar.png" alt="Female Avatar" />
+                    <AvatarImage src="/female-face-avatar.png" alt="Female Avatar" />
                     <AvatarFallback>F</AvatarFallback>
                   </Avatar>
                   <div className="text-center">
@@ -121,7 +126,6 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Form Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-foreground">First Name</Label>
@@ -136,13 +140,24 @@ const SignUp = () => {
                 <Label htmlFor="email" className="text-foreground">Email</Label>
                 <Input id="email" type="email" placeholder="john@example.com" className="bg-background border-border/50 focus:border-primary" value={formData.email} onChange={handleChange} />
               </div>
-              <div className="space-y-2 mt-4">
+              <div className="relative space-y-2 mt-4">
                 <Label htmlFor="password" className="text-foreground">Password</Label>
-                <Input id="password" type="password" placeholder="Create a strong password" className="bg-background border-border/50 focus:border-primary" value={formData.password} onChange={handleChange} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a strong password" className="bg-background border-border/50 focus:border-primary pr-10" value={formData.password} onChange={handleChange} />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-1 top-6" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
-              <div className="space-y-2 mt-4">
+              <div className="relative space-y-2 mt-4">
                 <Label htmlFor="confirmPassword" className="text-foreground">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" placeholder="Confirm your password" className="bg-background border-border/50 focus:border-primary" value={formData.confirmPassword} onChange={handleChange} />
+                <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" className="bg-background border-border/50 focus:border-primary pr-10" value={formData.confirmPassword} onChange={handleChange} />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-1 top-6" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                {formData.confirmPassword && (
+                  <p className={`text-xs mt-1 ${passwordMatch ? 'text-green-500' : 'text-red-500'}`}>
+                    {passwordMatch ? "Passwords match" : "Passwords do not match"}
+                  </p>
+                )}
               </div>
               <div className="flex items-center space-x-2 mt-4">
                 <input type="checkbox" id="terms" className="rounded" />
