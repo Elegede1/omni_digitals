@@ -94,7 +94,7 @@ const SignIn = () => {
                 </div>
                 <Link to="#" className="text-sm text-primary hover:underline">Forgot password?</Link>
               </div>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4">Sign In</Button>
+              <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-4">Sign In</Button>
             </form>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">Don't have an account?{" "}<Link to="/signup" className="text-primary hover:underline">Sign up</Link></p>
