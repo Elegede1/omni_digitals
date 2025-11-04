@@ -42,26 +42,30 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signin(request):
-    email = request.data.get('email')
-    password = request.data.get('password')
+    try:
+        email = request.data.get('email')
+        password = request.data.get('password')
 
-    user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=email, password=password)
 
-    if user is not None:
-        token, _ = Token.objects.get_or_create(user=user)
-        # Use get_or_create to make this resilient to users without profiles
-        profile, created = Profile.objects.get_or_create(user=user)
-        
-        avatar_url = None
-        if profile.profile_picture:
-            avatar_url = profile.profile_picture.url
+        if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
+            # Use get_or_create to make this resilient to users without profiles
+            profile, created = Profile.objects.get_or_create(user=user)
+            
+            avatar_url = None
+            if profile.profile_picture:
+                avatar_url = profile.profile_picture.url
 
-        return Response({
-            "token": token.key,
-            "avatar_url": avatar_url
-        })
-    else:
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({
+                "token": token.key,
+                "avatar_url": avatar_url
+            })
+        else:
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # /api/dashboard/
