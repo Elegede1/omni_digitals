@@ -49,10 +49,16 @@ def signin(request):
 
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
-        profile = Profile.objects.get(user=user)
+        # Use get_or_create to make this resilient to users without profiles
+        profile, created = Profile.objects.get_or_create(user=user)
+        
+        avatar_url = None
+        if profile.profile_picture:
+            avatar_url = profile.profile_picture.url
+
         return Response({
             "token": token.key,
-            "avatar_url": profile.profile_picture.url if profile.profile_picture else None
+            "avatar_url": avatar_url
         })
     else:
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
