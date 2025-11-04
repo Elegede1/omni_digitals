@@ -36,8 +36,7 @@ const SignIn = () => {
 
       if (response.ok) {
         console.log("Sign in successful:", data);
-        localStorage.setItem('token', data.token);
-        login(data.avatar_url);
+        login(data.token, data.avatar_url, data.email);
         navigate('/dashboard');
       } else {
         setBackendMessage(data.error || "An unknown error occurred.");

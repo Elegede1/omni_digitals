@@ -59,7 +59,8 @@ def signin(request):
 
             return Response({
                 "token": token.key,
-                "avatar_url": avatar_url
+                "avatar_url": avatar_url,
+                "email": user.email
             })
         else:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)

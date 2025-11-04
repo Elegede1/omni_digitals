@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, userAvatar, logout } = useAuth();
+  const { isAuthenticated, userAvatar, userEmail, logout } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50 animate-fade-in">
@@ -45,10 +45,12 @@ const Navigation = () => {
             </a>
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <Avatar className="h-9 w-9 cursor-pointer">
-                  <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
+                <Link to="/profile">
+                  <Avatar className="h-9 w-9 cursor-pointer">
+                    <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                    <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                  </Avatar>
+                </Link>
                 <Button onClick={logout} variant="ghost" size="sm">
                   <LogOut className="h-4 w-4" />
                 </Button>
@@ -103,10 +105,12 @@ const Navigation = () => {
               <div className="space-y-2">
                 {isAuthenticated ? (
                   <div className="flex items-center justify-between">
-                     <Avatar className="h-9 w-9 cursor-pointer">
-                       <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
-                       <AvatarFallback>U</AvatarFallback>
-                     </Avatar>
+                    <Link to="/profile">
+                      <Avatar className="h-9 w-9 cursor-pointer">
+                        <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                        <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <Button onClick={logout} variant="ghost" className="w-full justify-start">
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out

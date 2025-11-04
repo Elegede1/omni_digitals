@@ -3,7 +3,8 @@ import { createContext, useState, useContext, ReactNode, useEffect } from 'react
 interface AuthContextType {
   isAuthenticated: boolean;
   userAvatar: string | null;
-  login: (avatar: string) => void;
+  userEmail: string | null;
+  login: (token: string, avatar: string, email: string) => void;
   logout: () => void;
 }
 
@@ -12,32 +13,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const avatar = localStorage.getItem('avatar');
+    const email = localStorage.getItem('email');
     if (token) {
       setIsAuthenticated(true);
       setUserAvatar(avatar);
+      setUserEmail(email);
     }
   }, []);
 
-  const login = (avatar: string) => {
+  const login = (token: string, avatar: string, email: string) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('avatar', avatar);
+    localStorage.setItem('email', email);
     setIsAuthenticated(true);
     setUserAvatar(avatar);
-    localStorage.setItem('avatar', avatar);
-    // Token would be set here as well, e.g., localStorage.setItem('token', 'your_jwt_token');
+    setUserEmail(email);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUserAvatar(null);
+    setUserEmail(null);
     localStorage.removeItem('token');
     localStorage.removeItem('avatar');
+    localStorage.removeItem('email');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userAvatar, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userAvatar, userEmail, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
