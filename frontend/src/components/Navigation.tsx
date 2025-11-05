@@ -45,7 +45,7 @@ const Navigation = () => {
             </a>
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <Link to="/profile">
+                <Link to="/profile" onClick={(e) => e.stopPropagation()}>
                   <Avatar className="h-9 w-9 cursor-pointer">
                     <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
                     <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
@@ -105,7 +105,7 @@ const Navigation = () => {
               <div className="space-y-2">
                 {isAuthenticated ? (
                   <div className="flex items-center justify-between">
-                    <Link to="/profile">
+                    <Link to="/profile" onClick={(e) => e.stopPropagation()}>
                       <Avatar className="h-9 w-9 cursor-pointer">
                         <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
                         <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
