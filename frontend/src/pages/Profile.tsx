@@ -10,6 +10,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
+import { useAuth } from "@/context/AuthContext";
 import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDashboard } from "lucide-react";
 
 const Profile = () => {
@@ -25,7 +26,9 @@ const Profile = () => {
     state: "",
   });
   const [backendMessage, setBackendMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { userEmail, userAvatar, logout } = useAuth();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
@@ -44,6 +47,7 @@ const Profile = () => {
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
+            logout();
             navigate("/signin");
           }
           throw new Error("Network response was not ok");
@@ -51,15 +55,16 @@ const Profile = () => {
         return response.json();
       })
       .then((data) => {
-        setBackendMessage(data.message)
-        if(data.profile) {
-          setProfileData(data.profile)
+        if (data.profile) {
+          setProfileData(data.profile);
         }
+        setIsLoading(false);
       })
-      .catch((error) =>
-        setBackendMessage(`Failed to connect to backend: ${error.message}`)
-      );
-  }, [backendUrl, navigate]);
+      .catch((error) => {
+        setBackendMessage(`Failed to connect to backend: ${error.message}`);
+        setIsLoading(false);
+      });
+  }, [backendUrl, navigate, logout]);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -69,12 +74,11 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    setIsEditing(false);
     const token = localStorage.getItem('token');
 
     try {
       const response = await fetch(`${backendUrl}/api/profile/`, {
-        method: 'POST', // Or PUT/PATCH
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
@@ -88,6 +92,7 @@ const Profile = () => {
 
       const data = await response.json();
       setBackendMessage(data.message || "Profile updated successfully!");
+      setIsEditing(false);
 
     } catch (error) {
       console.error("Error saving profile data:", error);
@@ -96,23 +101,20 @@ const Profile = () => {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('avatar');
+    logout();
     navigate('/signin');
   };
 
-  const currentUser = {
-    name: profileData.fullName,
-    email: profileData.email,
-    avatar: "/placeholder.svg"
-  };
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a spinner component
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="fixed top-20 left-4 z-50 lg:hidden">
-        <ProfileSidebar user={currentUser} />
+        <ProfileSidebar user={{ name: profileData.fullName, email: profileData.email, avatar: userAvatar }} />
       </div>
       
       <div className="container mx-auto px-4 pt-24 pb-16">
@@ -122,11 +124,11 @@ const Profile = () => {
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardHeader className="text-center">
                 <Avatar className="h-20 w-20 mx-auto mb-4">
-                  <AvatarImage src="/placeholder.svg" alt="Jenny Wilson" />
-                  <AvatarFallback>JW</AvatarFallback>
+                  <AvatarImage src={userAvatar || "/placeholder.svg"} alt={profileData.fullName} />
+                  <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-lg font-semibold text-foreground">
-                  {profileData.fullName || 'Jenny Wilson'}
+                  {profileData.fullName || userEmail}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">Member</p>
               </CardHeader>
