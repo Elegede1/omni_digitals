@@ -19,8 +19,18 @@ const Quotations = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    // TODO: Add authentication headers
-    fetch(`${backendUrl}/api/quotation/`)
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    fetch(`${backendUrl}/api/quotation/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -32,8 +42,8 @@ const Quotations = () => {
       })
       .then((data) => {
         setBackendMessage(data.message)
-        if(data.quotations) {
-            setQuotations(data.quotations)
+        if (data.quotations) {
+          setQuotations(data.quotations)
         }
       })
       .catch((error) =>
@@ -113,7 +123,7 @@ const Quotations = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm" className="border-border text-foreground">
                   Status

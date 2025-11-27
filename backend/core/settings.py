@@ -15,9 +15,13 @@ import re
 import dj_database_url
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-$r-dqq160v*$a5skb$5$2wx-t3k!z!@x)3ylphrc^d=#x3y(86')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -85,6 +89,17 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = 'accounts.User'
 
+# Django REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
+
 # Set SITE_ID for django-allauth
 SITE_ID = 1
 
@@ -97,23 +112,28 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-# Use our custom adapter for social accounts (Temporarily Disabled for debugging)
-# SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
+# Use our custom adapter for social accounts to handle frontend redirects
+SOCIALACCOUNT_ADAPTER = 'accounts.adapter.CustomSocialAccountAdapter'
 
 # Frontend URL for redirects
-FRONTEND_SIGNUP_URL = os.environ.get('FRONTEND_SIGNUP_URL', 'http://localhost:5173/signup')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8081')
+FRONTEND_SIGNUP_URL = os.environ.get('FRONTEND_SIGNUP_URL', f'{FRONTEND_URL}/signup')
 
+# Redirect to frontend after login/logout
+LOGIN_REDIRECT_URL = f'{FRONTEND_URL}/profile'
+LOGOUT_REDIRECT_URL = FRONTEND_URL
 
 # Google social login configuration
-if 'GOOGLE_CLIENT_ID' not in os.environ or 'GOOGLE_CLIENT_SECRET' not in os.environ:
+# Only require Google credentials in production (when DEBUG is False)
+if not DEBUG and ('GOOGLE_CLIENT_ID' not in os.environ or 'GOOGLE_CLIENT_SECRET' not in os.environ):
     raise ImproperlyConfigured("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set in the environment.")
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
-            'secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
-        },
+        # 'APP': {
+        #     'client_id': os.environ.get('GOOGLE_CLIENT_ID', 'dummy-client-id-for-local-dev'),
+        #     'secret': os.environ.get('GOOGLE_CLIENT_SECRET', 'dummy-secret-for-local-dev'),
+        # },
         'SCOPE': [
             'profile',
             'email',
@@ -124,6 +144,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'SOCIALACCOUNT_AUTO_SIGNUP': True, # Automatically sign up the user
     }
 }
+
+# Skip the intermediate login page
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True # For debugging ONLY

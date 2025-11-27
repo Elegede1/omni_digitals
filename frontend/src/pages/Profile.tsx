@@ -28,9 +28,27 @@ const Profile = () => {
   const [backendMessage, setBackendMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const { userEmail, userAvatar, logout } = useAuth();
+  const { userEmail, userAvatar, logout, login } = useAuth();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
+  // Handle OAuth redirect with token in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const email = urlParams.get('email');
+    const avatar = urlParams.get('avatar');
+
+    console.log('OAuth redirect check:', { token, email, avatar, url: window.location.href });
+
+    if (token && email) {
+      // User just logged in via OAuth, save credentials
+      console.log('Logging in user from OAuth redirect');
+      login(token, avatar || '', email);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [login]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -112,11 +130,11 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <div className="fixed top-20 left-4 z-50 lg:hidden">
         <ProfileSidebar user={{ name: profileData.fullName, email: profileData.email, avatar: userAvatar }} />
       </div>
-      
+
       <div className="container mx-auto px-4 pt-24 pb-16">
         <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="flex flex-col lg:flex-row gap-8">
@@ -321,8 +339,8 @@ const Profile = () => {
                       <p className="text-sm text-primary">Telegram</p>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="border-primary text-primary hover:bg-primary/10"
                   >
                     Change password

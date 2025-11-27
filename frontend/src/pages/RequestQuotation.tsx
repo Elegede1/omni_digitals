@@ -20,8 +20,18 @@ const RequestQuotation = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    // A simple ping to the backend to check connectivity or get initial data
-    fetch(`${backendUrl}/api/request-quotation/`)
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    fetch(`${backendUrl}/api/request-quotation/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401) {
@@ -49,11 +59,12 @@ const RequestQuotation = () => {
     };
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${backendUrl}/api/request-quotation/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add auth headers
+          'Authorization': `Token ${token}`,
         },
         body: JSON.stringify(quotationData),
       });
@@ -104,7 +115,7 @@ const RequestQuotation = () => {
       services: []
     },
     {
-      category: "Consulting Services", 
+      category: "Consulting Services",
       services: []
     },
     {
@@ -118,8 +129,8 @@ const RequestQuotation = () => {
   ];
 
   const toggleService = (service: string) => {
-    setSelectedServices(prev => 
-      prev.includes(service) 
+    setSelectedServices(prev =>
+      prev.includes(service)
         ? prev.filter(s => s !== service)
         : [...prev, service]
     );
@@ -151,11 +162,10 @@ const RequestQuotation = () => {
                           <button
                             type="button"
                             onClick={() => toggleService(service)}
-                            className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                              selectedServices.includes(service)
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center ${selectedServices.includes(service)
                                 ? 'bg-primary border-primary'
                                 : 'border-border'
-                            }`}
+                              }`}
                           >
                             {selectedServices.includes(service) && (
                               <div className="w-2 h-2 bg-white rounded-sm" />
@@ -199,9 +209,9 @@ const RequestQuotation = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="quotation" className="text-foreground">get a quotation</Label>
-                        <Button 
+                        <Button
                           type="button"
-                          variant="outline" 
+                          variant="outline"
                           size="sm"
                           className="border-primary text-primary hover:bg-primary/10"
                         >
@@ -273,9 +283,9 @@ const RequestQuotation = () => {
                     <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1">
                       Submit Quotation Request
                     </Button>
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       className="border-border text-foreground hover:bg-muted/50"
                     >
                       Save as Draft
