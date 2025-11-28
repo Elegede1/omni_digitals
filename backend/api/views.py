@@ -98,12 +98,28 @@ def profile(request):
         # Update logic here
         return Response({"message": "Profile updated successfully"})
     
+    # Calculate user statistics
+    # TODO: Replace with actual order/quotation count from database
+    total_orders = 0  # Will increase as user completes requests
+    membership_level = "Free"  # Default membership level
+    member_id = f"USER-{user.id:04d}"  # Format: USER-0001, USER-0002, etc.
+    
     profile_data = {
         "email": user.email,
         "fullName": user.get_full_name(),
         # Add other fields from your Profile model
     }
-    return Response(profile_data)
+    
+    statistics = {
+        "totalOrders": total_orders,
+        "membershipLevel": membership_level,
+        "memberId": member_id,
+    }
+    
+    return Response({
+        "profile": profile_data,
+        "statistics": statistics
+    })
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

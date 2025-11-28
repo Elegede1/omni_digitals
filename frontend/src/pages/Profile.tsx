@@ -25,6 +25,11 @@ const Profile = () => {
     city: "",
     state: "",
   });
+  const [statistics, setStatistics] = useState({
+    totalOrders: 0,
+    membershipLevel: "Free",
+    memberId: "N/A",
+  });
   const [backendMessage, setBackendMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -75,6 +80,9 @@ const Profile = () => {
       .then((data) => {
         if (data.profile) {
           setProfileData(data.profile);
+        }
+        if (data.statistics) {
+          setStatistics(data.statistics);
         }
         setIsLoading(false);
       })
@@ -197,8 +205,8 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Orders</p>
-                      <p className="text-2xl font-bold text-foreground">400</p>
-                      <p className="text-xs text-primary">+12% from last month</p>
+                      <p className="text-2xl font-bold text-foreground">{statistics.totalOrders}</p>
+                      <p className="text-xs text-muted-foreground">Completed requests</p>
                     </div>
                     <div className="h-8 w-16 bg-primary/20 rounded flex items-center justify-center">
                       <BarChart3 className="h-4 w-4 text-primary" />
@@ -212,8 +220,8 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Membership Level</p>
-                      <Badge className="bg-primary text-primary-foreground">Boost Lite</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">membership level</p>
+                      <Badge className="bg-primary text-primary-foreground">{statistics.membershipLevel}</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Current tier</p>
                     </div>
                   </div>
                 </CardContent>
@@ -224,7 +232,7 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Member ID</p>
-                      <p className="text-lg font-bold text-primary">BL - 234</p>
+                      <p className="text-lg font-bold text-primary">{statistics.memberId}</p>
                     </div>
                   </div>
                 </CardContent>
