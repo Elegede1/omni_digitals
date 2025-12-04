@@ -31,7 +31,13 @@ def signup(request):
 
         user = User.objects.create_user(email=email, password=password, first_name=first_name, last_name=last_name)
         
-        # The Profile is created automatically by the signal in accounts/signals.py
+        # Get or create profile (should be created by signal, but let's be safe)
+        profile, _ = Profile.objects.get_or_create(user=user)
+        
+        # Handle profile picture upload if provided
+        if 'profile_picture' in request.FILES:
+            profile.profile_picture = request.FILES['profile_picture']
+            profile.save()
         
         return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
 
@@ -55,7 +61,7 @@ def signin(request):
             
             avatar_url = None
             if profile.profile_picture:
-                avatar_url = profile.profile_picture.url
+                avatar_url = request.build_absolute_uri(profile.profile_picture.url)
 
             return Response({
                 "token": token.key,
@@ -95,8 +101,47 @@ def profile(request):
     profile, _ = Profile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
-        # Update logic here
-        return Response({"message": "Profile updated successfully"})
+        # Handle profile picture upload
+        if 'profile_picture' in request.FILES:
+            profile.profile_picture = request.FILES['profile_picture']
+        
+        # Update user's first and last name if provided
+        if 'fullName' in request.data:
+            full_name = request.data['fullName']
+            if full_name:
+                parts = full_name.split(' ', 1)
+                user.first_name = parts[0]
+                user.last_name = parts[1] if len(parts) > 1 else ''
+                user.save()
+        
+        # Update profile fields - map frontend field names to backend
+        # Note: Profile model might not have all these fields yet
+        # You may need to add them to the Profile model
+        field_mapping = {
+            'phone': 'phone',
+            'whatsapp': 'whatsapp', 
+            'telegram': 'telegram',
+            'businessName': 'business_name',
+            'city': 'city',
+            'state': 'state',
+        }
+        
+        for frontend_field, backend_field in field_mapping.items():
+            if frontend_field in request.data and hasattr(profile, backend_field):
+                setattr(profile, backend_field, request.data[frontend_field])
+        
+        # Save the profile
+        profile.save()
+        
+        # Return updated avatar URL
+        avatar_url = ''
+        if profile.profile_picture:
+            avatar_url = request.build_absolute_uri(profile.profile_picture.url)
+        
+        return Response({
+            "message": "Profile updated successfully",
+            "avatar_url": avatar_url
+        })
     
     # Calculate user statistics
     # TODO: Replace with actual order/quotation count from database
@@ -104,10 +149,21 @@ def profile(request):
     membership_level = "Free"  # Default membership level
     member_id = f"USER-{user.id:04d}"  # Format: USER-0001, USER-0002, etc.
     
+    # Get avatar URL from profile picture
+    avatar_url = ''
+    if profile.profile_picture:
+        avatar_url = request.build_absolute_uri(profile.profile_picture.url)
+    
     profile_data = {
         "email": user.email,
         "fullName": user.get_full_name(),
-        # Add other fields from your Profile model
+        "avatar_url": avatar_url,
+        "phone": profile.phone or "",
+        "whatsapp": profile.whatsapp or "",
+        "telegram": profile.telegram or "",
+        "businessName": profile.business_name or "",
+        "city": profile.city or "",
+        "state": profile.state or "",
     }
     
     statistics = {

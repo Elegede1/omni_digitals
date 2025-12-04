@@ -6,6 +6,7 @@ interface AuthContextType {
   userEmail: string | null;
   login: (token: string, avatar: string, email: string) => void;
   logout: () => void;
+  updateAvatar: (avatar: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,8 +45,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('email');
   };
 
+  const updateAvatar = (avatar: string) => {
+    localStorage.setItem('avatar', avatar);
+    setUserAvatar(avatar);
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userAvatar, userEmail, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userAvatar, userEmail, login, logout, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );

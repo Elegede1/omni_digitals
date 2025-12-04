@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useAuth } from "@/context/AuthContext";
-import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDashboard } from "lucide-react";
+import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDashboard, Camera } from "lucide-react";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -32,8 +32,10 @@ const Profile = () => {
   });
   const [backendMessage, setBackendMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const navigate = useNavigate();
-  const { userEmail, userAvatar, logout, login } = useAuth();
+  const { userEmail, userAvatar, logout, login, updateAvatar } = useAuth();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
@@ -80,6 +82,10 @@ const Profile = () => {
       .then((data) => {
         if (data.profile) {
           setProfileData(data.profile);
+          // Update avatar in localStorage if provided by backend
+          if (data.profile.avatar_url) {
+            localStorage.setItem('avatar', data.profile.avatar_url);
+          }
         }
         if (data.statistics) {
           setStatistics(data.statistics);
@@ -103,13 +109,24 @@ const Profile = () => {
     const token = localStorage.getItem('token');
 
     try {
+      const formData = new FormData();
+
+      // Only append profile data if they've changed
+      Object.keys(profileData).forEach(key => {
+        formData.append(key, profileData[key as keyof typeof profileData]);
+      });
+
+      // Append profile picture if a new one was selected
+      if (profilePicture) {
+        formData.append('profile_picture', profilePicture);
+      }
+
       const response = await fetch(`${backendUrl}/api/profile/`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
         },
-        body: JSON.stringify(profileData),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -118,11 +135,36 @@ const Profile = () => {
 
       const data = await response.json();
       setBackendMessage(data.message || "Profile updated successfully!");
+
+      // Update avatar in auth context and localStorage if it changed
+      if (data.avatar_url) {
+        updateAvatar(data.avatar_url);
+        setPreviewUrl(''); // Clear preview
+      }
+
       setIsEditing(false);
+      setProfilePicture(null);
 
     } catch (error) {
       console.error("Error saving profile data:", error);
       setBackendMessage("Failed to save profile. Please try again.");
+    }
+  };
+
+  const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfilePicture(file);
+
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Automatically enable edit mode when selecting a picture
+      setIsEditing(true);
     }
   };
 
@@ -149,10 +191,26 @@ const Profile = () => {
           <div className="hidden lg:block lg:w-1/4 space-y-6">
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardHeader className="text-center">
-                <Avatar className="h-20 w-20 mx-auto mb-4">
-                  <AvatarImage src={userAvatar || "/placeholder.svg"} alt={profileData.fullName} />
-                  <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
-                </Avatar>
+                <div className="relative inline-block mx-auto mb-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage
+                      src={previewUrl || userAvatar || "/placeholder.svg"}
+                      alt={profileData.fullName}
+                      className="object-cover"
+                    />
+                    <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                  </Avatar>
+                  <label htmlFor="profile-picture-upload" className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-1.5 rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
+                    <Camera className="h-3 w-3" />
+                  </label>
+                  <input
+                    id="profile-picture-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProfilePictureChange}
+                  />
+                </div>
                 <CardTitle className="text-lg font-semibold text-foreground">
                   {profileData.fullName || userEmail}
                 </CardTitle>
@@ -163,7 +221,7 @@ const Profile = () => {
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardContent className="pt-6 space-y-3">
                 <Link to="/dashboard">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <LayoutDashboard className="h-4 w-4 mr-2" />
                     Dashboard
                   </Button>
@@ -173,24 +231,24 @@ const Profile = () => {
                   Personal Information
                 </Button>
                 <Link to="/quotations">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Quotations
                   </Button>
                 </Link>
                 <Link to="/membership">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <CreditCard className="h-4 w-4 mr-2" />
                     Membership & Billings
                   </Button>
                 </Link>
                 <Link to="/chat">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary">
+                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Message
                   </Button>
                 </Link>
-                <Button variant="ghost" className="w-full justify-start text-foreground hover:text-primary" onClick={handleSignOut}>
+                <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>
@@ -255,83 +313,107 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={profileData.fullName}
-                      onChange={(e) => handleInputChange("fullName", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="fullName"
+                        value={profileData.fullName}
+                        onChange={(e) => handleInputChange("fullName", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.fullName || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-foreground">Email</Label>
-                    <Input
-                      id="email"
-                      value={profileData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="email"
+                        value={profileData.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.email || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-foreground">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={profileData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="phone"
+                        value={profileData.phone}
+                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.phone || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="whatsapp" className="text-foreground">WhatsApp</Label>
-                    <Input
-                      id="whatsapp"
-                      value={profileData.whatsapp}
-                      onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="whatsapp"
+                        value={profileData.whatsapp}
+                        onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.whatsapp || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="telegram" className="text-foreground">Telegram</Label>
-                    <Input
-                      id="telegram"
-                      value={profileData.telegram}
-                      onChange={(e) => handleInputChange("telegram", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="telegram"
+                        value={profileData.telegram}
+                        onChange={(e) => handleInputChange("telegram", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.telegram || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="businessName" className="text-foreground">Business Name (if any)</Label>
-                    <Input
-                      id="businessName"
-                      value={profileData.businessName}
-                      onChange={(e) => handleInputChange("businessName", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="businessName"
+                        value={profileData.businessName}
+                        onChange={(e) => handleInputChange("businessName", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.businessName || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city" className="text-foreground">City</Label>
-                    <Input
-                      id="city"
-                      value={profileData.city}
-                      onChange={(e) => handleInputChange("city", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="city"
+                        value={profileData.city}
+                        onChange={(e) => handleInputChange("city", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.city || "Not provided"}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state" className="text-foreground">State</Label>
-                    <Input
-                      id="state"
-                      value={profileData.state}
-                      onChange={(e) => handleInputChange("state", e.target.value)}
-                      disabled={!isEditing}
-                      className="bg-background border-border/50 focus:border-primary"
-                    />
+                    {isEditing ? (
+                      <Input
+                        id="state"
+                        value={profileData.state}
+                        onChange={(e) => handleInputChange("state", e.target.value)}
+                        className="bg-background border-border/50 focus:border-primary"
+                      />
+                    ) : (
+                      <p className="text-foreground py-2">{profileData.state || "Not provided"}</p>
+                    )}
                   </div>
                 </div>
 

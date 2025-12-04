@@ -23,6 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables from .env file
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
+# TEMPORARY: Force SQLite for local development
+# Comment out the line below when you want to use Supabase again
+os.environ.pop('DATABASE_URL', None)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

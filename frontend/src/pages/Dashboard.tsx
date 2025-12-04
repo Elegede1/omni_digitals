@@ -96,19 +96,19 @@ const Dashboard = () => {
                       you are 300 points away to BOOST LEGEND
                     </p>
                     <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="border-primary text-primary hover:bg-primary/10"
                       >
                         Upgrade Membership
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         className="border-primary text-primary hover:bg-primary/10"
                       >
                         View Billing
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         className="border-primary text-primary hover:bg-primary/10"
                       >
@@ -147,13 +147,12 @@ const Dashboard = () => {
                       <td className="py-3 text-sm text-muted-foreground">{order.start}</td>
                       <td className="py-3 text-sm text-muted-foreground">{order.end}</td>
                       <td className="py-3">
-                        <Badge 
-                          className={`${
-                            order.status === 'active' ? 'bg-green-500/20 text-green-500' :
-                            order.status === 'cancelled' ? 'bg-red-500/20 text-red-500' :
-                            order.status === 'completed' ? 'bg-blue-500/20 text-blue-500' :
-                            'bg-yellow-500/20 text-yellow-500'
-                          }`}
+                        <Badge
+                          className={`${order.status === 'active' ? 'bg-green-500/20 text-green-500' :
+                              order.status === 'cancelled' ? 'bg-red-500/20 text-red-500' :
+                                order.status === 'completed' ? 'bg-blue-500/20 text-blue-500' :
+                                  'bg-yellow-500/20 text-yellow-500'
+                            }`}
                         >
                           {order.status}
                         </Badge>
@@ -177,17 +176,12 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl font-bold text-primary">Benefits</CardTitle>
-              <div className="flex space-x-2">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get A Quotation
-                </Button>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get A Quotation
-                </Button>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get A Quotation
-                </Button>
-              </div>
+              <Button
+                onClick={() => navigate('/request-quotation')}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Get A Quotation
+              </Button>
             </div>
           </CardHeader>
           <CardContent>

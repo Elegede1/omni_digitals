@@ -17,14 +17,14 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 cursor-pointer group">
-            <img 
-              src={logoLight} 
-              alt="MNI Digitals" 
+            <img
+              src={logoLight}
+              alt="MNI Digitals"
               className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:scale-105"
             />
-            <img 
-              src={logoDark} 
-              alt="MNI Digitals" 
+            <img
+              src={logoDark}
+              alt="MNI Digitals"
               className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105"
             />
           </Link>
@@ -47,7 +47,7 @@ const Navigation = () => {
               <div className="flex items-center space-x-4">
                 <Link to="/profile" onClick={(e) => e.stopPropagation()}>
                   <Avatar className="h-9 w-9 cursor-pointer">
-                    <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                    <AvatarImage src={userAvatar || undefined} alt="User Avatar" className="object-cover" />
                     <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                   </Avatar>
                 </Link>
@@ -58,16 +58,16 @@ const Navigation = () => {
             ) : (
               <>
                 <Link to="/signin">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="mr-2 border-primary text-primary hover:bg-primary/10 transition-all duration-300"
                   >
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow hover:shadow-elegant transition-all duration-300 hover:scale-105"
                   >
                     Sign Up
@@ -107,7 +107,7 @@ const Navigation = () => {
                   <div className="flex items-center justify-between">
                     <Link to="/profile" onClick={(e) => e.stopPropagation()}>
                       <Avatar className="h-9 w-9 cursor-pointer">
-                        <AvatarImage src={userAvatar || undefined} alt="User Avatar" />
+                        <AvatarImage src={userAvatar || undefined} alt="User Avatar" className="object-cover" />
                         <AvatarFallback>{userEmail ? userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                       </Avatar>
                     </Link>
@@ -119,16 +119,16 @@ const Navigation = () => {
                 ) : (
                   <>
                     <Link to="/signin" className="block">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full border-primary text-primary hover:bg-primary/10 transition-all duration-300"
                       >
                         Sign In
                       </Button>
                     </Link>
                     <Link to="/signup" className="block">
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow transition-all duration-300"
                       >
                         Sign Up

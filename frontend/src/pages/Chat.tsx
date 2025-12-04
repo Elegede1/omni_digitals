@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { Search, Send, MoreVertical } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
@@ -15,26 +17,62 @@ const Chat = () => {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [backendMessage, setBackendMessage] = useState("");
+  const [userName, setUserName] = useState("");
+  const { userEmail, userAvatar } = useAuth();
+  const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
-    fetch(`${backendUrl}/api/chat/`)
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
+
+    // Fetch user profile to get first name
+    fetch(`${backendUrl}/api/profile/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch profile");
+        return response.json();
+      })
+      .then((data) => {
+        if (data.profile && data.profile.fullName) {
+          const firstName = data.profile.fullName.split(' ')[0];
+          setUserName(firstName);
+        }
+      })
+      .catch((error) => console.error("Error fetching profile:", error));
+
+    // Fetch chat data
+    fetch(`${backendUrl}/api/chat/`, {
+      headers: {
+        'Authorization': `Token ${token}`,
+      },
+    })
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            navigate("/signin");
+          }
           throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
-          setBackendMessage(data.message)
-          if(data.users) setUsers(data.users)
-          if(data.messages) setMessages(data.messages)
+        setBackendMessage(data.message)
+        if (data.users) setUsers(data.users)
+        if (data.messages) setMessages(data.messages)
       })
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
       );
-  }, [backendUrl]);
+  }, [backendUrl, navigate]);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -50,11 +88,12 @@ const Chat = () => {
     setMessage("");
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${backendUrl}/api/chat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Include auth headers if required
+          'Authorization': `Token ${token}`,
         },
         body: JSON.stringify({ message: message, recipient: selectedUser })
       });
@@ -64,10 +103,10 @@ const Chat = () => {
       }
 
       const actualMessage = await response.json();
-      
+
       // Replace the optimistic message with the one from the server
-      setMessages(prevMessages => 
-        prevMessages.map(msg => 
+      setMessages(prevMessages =>
+        prevMessages.map(msg =>
           msg === newMessage ? actualMessage : msg
         )
       );
@@ -80,16 +119,16 @@ const Chat = () => {
     }
   };
 
-  const mockUser = {
-    name: "Chat User",
-    email: "user@example.com",
-    avatar: ""
+  const currentUser = {
+    name: userName || userEmail?.split('@')[0] || "User",
+    email: userEmail || "user@example.com",
+    avatar: userAvatar || ""
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <ProfileSidebar user={mockUser} hideButton={true} />
+      <ProfileSidebar user={currentUser} hideButton={true} />
       <div className="container mx-auto px-4 pt-24 pb-16">
         <p className="my-4 text-center text-green-500">{backendMessage}</p>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[70vh]">
@@ -110,11 +149,10 @@ const Chat = () => {
                   <div
                     key={index}
                     onClick={() => setSelectedUser(user.name)}
-                    className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedUser === user.name 
-                        ? "bg-primary/10 border border-primary/20" 
+                    className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors ${selectedUser === user.name
+                        ? "bg-primary/10 border border-primary/20"
                         : "hover:bg-muted/50"
-                    }`}
+                      }`}
                   >
                     <div className="relative">
                       <Avatar className="h-10 w-10">
@@ -168,18 +206,16 @@ const Chat = () => {
                     className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        msg.sender === 'me'
+                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${msg.sender === 'me'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-foreground'
-                      }`}
+                        }`}
                     >
                       <p className="text-sm">{msg.text}</p>
-                      <p className={`text-xs mt-1 ${
-                        msg.sender === 'me' 
-                          ? 'text-primary-foreground/70' 
+                      <p className={`text-xs mt-1 ${msg.sender === 'me'
+                          ? 'text-primary-foreground/70'
                           : 'text-muted-foreground'
-                      }`}>
+                        }`}>
                         {msg.time}
                       </p>
                     </div>

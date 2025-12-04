@@ -15,6 +15,7 @@ const RequestQuotation = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [formData, setFormData] = useState({});
   const [backendMessage, setBackendMessage] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set([0])); // First category expanded by default
   const navigate = useNavigate();
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
@@ -84,6 +85,24 @@ const RequestQuotation = () => {
     }
   };
 
+  const toggleService = (service: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]
+    );
+  };
+
+  const toggleCategory = (index: number) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
   const serviceCategories = [
     {
       category: "Digital Marketing",
@@ -128,14 +147,6 @@ const RequestQuotation = () => {
     }
   ];
 
-  const toggleService = (service: string) => {
-    setSelectedServices(prev =>
-      prev.includes(service)
-        ? prev.filter(s => s !== service)
-        : [...prev, service]
-    );
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -147,24 +158,31 @@ const RequestQuotation = () => {
             <div className="lg:col-span-1 space-y-4">
               {serviceCategories.map((category, index) => (
                 <Card key={index} className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                  <CardHeader className="pb-3">
+                  <CardHeader
+                    className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => toggleCategory(index)}
+                  >
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium text-foreground">
                         {category.category}
                       </CardTitle>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown
+                        className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${expandedCategories.has(index) ? 'rotate-180' : ''
+                          }`}
+                      />
                     </div>
                   </CardHeader>
-                  {category.services.length > 0 && (
-                    <CardContent className="pt-0 space-y-2">
+                  {expandedCategories.has(index) && category.services.length > 0 && (
+                    <CardContent className="pt-0 space-y-2 overflow-hidden transition-all duration-300 ease-in-out">
+
                       {category.services.map((service, serviceIndex) => (
                         <div key={serviceIndex} className="flex items-center space-x-2">
                           <button
                             type="button"
                             onClick={() => toggleService(service)}
                             className={`w-4 h-4 rounded border-2 flex items-center justify-center ${selectedServices.includes(service)
-                                ? 'bg-primary border-primary'
-                                : 'border-border'
+                              ? 'bg-primary border-primary'
+                              : 'border-border'
                               }`}
                           >
                             {selectedServices.includes(service) && (
@@ -186,12 +204,21 @@ const RequestQuotation = () => {
             {/* Quote Form */}
             <div className="lg:col-span-2">
               <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl font-bold text-foreground">Email Marketing</CardTitle>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-primary text-primary hover:bg-primary/10"
+                  >
+                    consult
+                  </Button>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  {/* Platform and Get a quotation on same line */}
+                  <div className="flex items-end gap-6">
+                    <div className="flex-1 space-y-2">
                       <Label htmlFor="platform" className="text-foreground">Platform</Label>
                       <Select onValueChange={(value) => handleInputChange('platform', value)}>
                         <SelectTrigger className="bg-background border-border/50 focus:border-primary">
@@ -206,18 +233,8 @@ const RequestQuotation = () => {
                       </Select>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="quotation" className="text-foreground">get a quotation</Label>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="border-primary text-primary hover:bg-primary/10"
-                        >
-                          consult
-                        </Button>
-                      </div>
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="quotation" className="text-foreground">Get a quotation</Label>
                       <Input
                         id="quotation"
                         onChange={(e) => handleInputChange('quotation_details', e.target.value)}
