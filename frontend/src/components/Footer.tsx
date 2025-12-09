@@ -134,7 +134,7 @@ const Footer = () => {
         <div className="border-t border-border mt-16 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} MNI Digitals. All rights reserved.
+              © {new Date().getFullYear()} Omni Digitals. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300 text-sm">
