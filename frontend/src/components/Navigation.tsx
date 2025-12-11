@@ -40,9 +40,14 @@ const Navigation = () => {
             <Link to="/community" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Community
             </Link>
-            <a href="#works" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
+            <Link to="/works" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Works
-            </a>
+            </Link>
+            {userEmail === 'admin@omnidigitals.com' && (
+              <Link to="/admin" className="text-foreground hover:text-primary transition-colors duration-300 font-medium text-red-500">
+                Admin
+              </Link>
+            )}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <Link to="/profile" onClick={(e) => e.stopPropagation()}>

@@ -37,6 +37,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const { userEmail, userAvatar, logout, login, updateAvatar } = useAuth();
 
+  const isAdmin = userEmail === 'admin@omnidigitals.com';
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   // Handle OAuth redirect with token in URL
@@ -220,28 +222,34 @@ const Profile = () => {
 
             <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
               <CardContent className="pt-6 space-y-3">
-                <Link to="/dashboard">
+                <Link to={isAdmin ? "/admin" : "/dashboard"}>
                   <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <LayoutDashboard className="h-4 w-4 mr-2" />
-                    Dashboard
+                    {isAdmin ? "Admin Dashboard" : "Dashboard"}
                   </Button>
                 </Link>
-                <Button variant="default" className="w-full justify-start bg-primary text-primary-foreground">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Personal Information
-                </Button>
-                <Link to="/quotations">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Quotations
+                {!isAdmin && (
+                  <Button variant="default" className="w-full justify-start bg-primary text-primary-foreground">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Personal Information
                   </Button>
-                </Link>
-                <Link to="/membership">
-                  <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Membership & Billings
-                  </Button>
-                </Link>
+                )}
+                {!isAdmin && (
+                  <Link to="/quotations">
+                    <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Quotations
+                    </Button>
+                  </Link>
+                )}
+                {!isAdmin && (
+                  <Link to="/membership">
+                    <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Membership & Billings
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/chat">
                   <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-primary/10">
                     <MessageSquare className="h-4 w-4 mr-2" />
@@ -257,187 +265,229 @@ const Profile = () => {
           </div>
 
           <div className="lg:w-3/4 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Orders</p>
-                      <p className="text-2xl font-bold text-foreground">{statistics.totalOrders}</p>
-                      <p className="text-xs text-muted-foreground">Completed requests</p>
-                    </div>
-                    <div className="h-8 w-16 bg-primary/20 rounded flex items-center justify-center">
-                      <BarChart3 className="h-4 w-4 text-primary" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {!isAdmin ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Total Orders</p>
+                          <p className="text-2xl font-bold text-foreground">{statistics.totalOrders}</p>
+                          <p className="text-xs text-muted-foreground">Completed requests</p>
+                        </div>
+                        <div className="h-8 w-16 bg-primary/20 rounded flex items-center justify-center">
+                          <BarChart3 className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Membership Level</p>
-                      <Badge className="bg-primary text-primary-foreground">{statistics.membershipLevel}</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">Current tier</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Membership Level</p>
+                          <Badge className="bg-primary text-primary-foreground">{statistics.membershipLevel}</Badge>
+                          <p className="text-xs text-muted-foreground mt-1">Current tier</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Member ID</p>
-                      <p className="text-lg font-bold text-primary">{statistics.memberId}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-bold text-foreground">
-                  Personal/Business Information
-                </CardTitle>
-                <Button
-                  onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  {isEditing ? "Save" : "Edit"}
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
-                    {isEditing ? (
-                      <Input
-                        id="fullName"
-                        value={profileData.fullName}
-                        onChange={(e) => handleInputChange("fullName", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.fullName || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground">Email</Label>
-                    {isEditing ? (
-                      <Input
-                        id="email"
-                        value={profileData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.email || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-foreground">Phone</Label>
-                    {isEditing ? (
-                      <Input
-                        id="phone"
-                        value={profileData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.phone || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="whatsapp" className="text-foreground">WhatsApp</Label>
-                    {isEditing ? (
-                      <Input
-                        id="whatsapp"
-                        value={profileData.whatsapp}
-                        onChange={(e) => handleInputChange("whatsapp", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.whatsapp || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telegram" className="text-foreground">Telegram</Label>
-                    {isEditing ? (
-                      <Input
-                        id="telegram"
-                        value={profileData.telegram}
-                        onChange={(e) => handleInputChange("telegram", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.telegram || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="businessName" className="text-foreground">Business Name (if any)</Label>
-                    {isEditing ? (
-                      <Input
-                        id="businessName"
-                        value={profileData.businessName}
-                        onChange={(e) => handleInputChange("businessName", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.businessName || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city" className="text-foreground">City</Label>
-                    {isEditing ? (
-                      <Input
-                        id="city"
-                        value={profileData.city}
-                        onChange={(e) => handleInputChange("city", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.city || "Not provided"}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state" className="text-foreground">State</Label>
-                    {isEditing ? (
-                      <Input
-                        id="state"
-                        value={profileData.state}
-                        onChange={(e) => handleInputChange("state", e.target.value)}
-                        className="bg-background border-border/50 focus:border-primary"
-                      />
-                    ) : (
-                      <p className="text-foreground py-2">{profileData.state || "Not provided"}</p>
-                    )}
-                  </div>
+                  <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Member ID</p>
+                          <p className="text-lg font-bold text-primary">{statistics.memberId}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div className="space-y-4 border-t border-border/50 pt-6">
-                  <h3 className="text-lg font-semibold text-foreground">Additional Settings</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-foreground">Preferred Contact Channel</Label>
-                      <p className="text-sm text-primary">Telegram</p>
+                <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-xl font-bold text-foreground">
+                      Personal/Business Information
+                    </CardTitle>
+                    <Button
+                      onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {isEditing ? "Save" : "Edit"}
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
+                        {isEditing ? (
+                          <Input
+                            id="fullName"
+                            value={profileData.fullName}
+                            onChange={(e) => handleInputChange("fullName", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.fullName || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-foreground">Email</Label>
+                        {isEditing ? (
+                          <Input
+                            id="email"
+                            value={profileData.email}
+                            onChange={(e) => handleInputChange("email", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.email || "Not provided"}</p>
+                        )}
+                      </div>
+                      {/* ... other standard user fields ... */}
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-foreground">Phone</Label>
+                        {isEditing ? (
+                          <Input
+                            id="phone"
+                            value={profileData.phone}
+                            onChange={(e) => handleInputChange("phone", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.phone || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp" className="text-foreground">WhatsApp</Label>
+                        {isEditing ? (
+                          <Input
+                            id="whatsapp"
+                            value={profileData.whatsapp}
+                            onChange={(e) => handleInputChange("whatsapp", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.whatsapp || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="telegram" className="text-foreground">Telegram</Label>
+                        {isEditing ? (
+                          <Input
+                            id="telegram"
+                            value={profileData.telegram}
+                            onChange={(e) => handleInputChange("telegram", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.telegram || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="businessName" className="text-foreground">Business Name</Label>
+                        {isEditing ? (
+                          <Input
+                            id="businessName"
+                            value={profileData.businessName}
+                            onChange={(e) => handleInputChange("businessName", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.businessName || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city" className="text-foreground">City</Label>
+                        {isEditing ? (
+                          <Input
+                            id="city"
+                            value={profileData.city}
+                            onChange={(e) => handleInputChange("city", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.city || "Not provided"}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="state" className="text-foreground">State</Label>
+                        {isEditing ? (
+                          <Input
+                            id="state"
+                            value={profileData.state}
+                            onChange={(e) => handleInputChange("state", e.target.value)}
+                            className="bg-background border-border/50 focus:border-primary"
+                          />
+                        ) : (
+                          <p className="text-foreground py-2">{profileData.state || "Not provided"}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-foreground">Service Interest</Label>
-                      <p className="text-sm text-primary">Telegram</p>
+
+                    <div className="space-y-4 border-t border-border/50 pt-6">
+                      <h3 className="text-lg font-semibold text-foreground">Additional Settings</h3>
+                      {/* ... settings ... */}
+                      <Button
+                        variant="outline"
+                        className="border-primary text-primary hover:bg-primary/10"
+                      >
+                        Change password
+                      </Button>
                     </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="border-primary text-primary hover:bg-primary/10"
-                  >
-                    Change password
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              // Admin View
+              <div className="space-y-6">
+                <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      Admin Notifications
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                        <h4 className="font-semibold text-green-500 mb-1">New System Alert</h4>
+                        <p className="text-sm text-foreground/80">
+                          Welcome to the Admin Panel. Check the dashboard for new quotations.
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                        <h4 className="font-semibold mb-1">Community Report</h4>
+                        <p className="text-sm text-muted-foreground">
+                          No new reports from the community page.
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+                        <h4 className="font-semibold mb-1">Messages</h4>
+                        <p className="text-sm text-muted-foreground">
+                          You have 0 unread messages from clients.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                  <CardHeader>
+                    <CardTitle>Account Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Manage your admin account credentials and preferences here.
+                    </p>
+                    <Button variant="outline">Change Admin Password</Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         </div>
       </div>

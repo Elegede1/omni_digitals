@@ -247,3 +247,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Email Configuration
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Configure production email backend here (e.g. SMTP)
+    pass
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@omnidigitals.com')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@omnidigitals.com')

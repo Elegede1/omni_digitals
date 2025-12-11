@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { 
-  User, 
-  MessageSquare, 
-  CreditCard, 
-  LayoutDashboard, 
-  FileText, 
+import {
+  User,
+  MessageSquare,
+  CreditCard,
+  LayoutDashboard,
+  FileText,
   LogOut,
   Settings
 } from "lucide-react";
@@ -28,33 +28,43 @@ interface ProfileSidebarExtendedProps extends ProfileSidebarProps {
 const ProfileSidebar = ({ user, hideButton = false }: ProfileSidebarExtendedProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const isAdmin = user.email === 'admin@omnidigitals.com';
+
   const menuItems = [
-    { 
-      icon: LayoutDashboard, 
-      label: "Dashboard", 
-      href: "/dashboard" 
+    {
+      icon: LayoutDashboard,
+      label: isAdmin ? "Admin Dashboard" : "Dashboard",
+      href: isAdmin ? "/admin" : "/dashboard"
     },
-    { 
-      icon: MessageSquare, 
-      label: "Chat", 
-      href: "/chat" 
+    {
+      icon: MessageSquare,
+      label: "Chat",
+      href: "/chat"
     },
-    { 
-      icon: CreditCard, 
-      label: "Membership & Billing", 
-      href: "/membership" 
+    {
+      icon: CreditCard,
+      label: "Membership & Billing",
+      href: "/membership"
     },
-    { 
-      icon: FileText, 
-      label: "Quotations", 
-      href: "/quotations" 
+    {
+      icon: FileText,
+      label: "Quotations",
+      href: "/quotations"
     },
-    { 
-      icon: Settings, 
-      label: "Profile Settings", 
-      href: "/profile" 
+    {
+      icon: Settings,
+      label: "Profile Settings",
+      href: "/profile"
     }
-  ];
+  ].filter(item => {
+    if (isAdmin) {
+      // Hide Quotations for Admin
+      if (item.label === "Quotations") return false;
+      // Also potentially hide Membership if desired, but user only asked for Quotations.
+      // Keeping Membership for now unless user clarifies.
+    }
+    return true;
+  });
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -68,9 +78,9 @@ const ProfileSidebar = ({ user, hideButton = false }: ProfileSidebarExtendedProp
           </Button>
         </SheetTrigger>
       )}
-      
-      <SheetContent 
-        side="left" 
+
+      <SheetContent
+        side="left"
         className="w-80 p-0 animate-slide-in-left bg-sidebar-background border-sidebar-border"
       >
         {/* Profile Header */}

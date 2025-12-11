@@ -9,61 +9,129 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import { ChevronDown, HelpCircle, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const RequestQuotation = () => {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<any>({});
   const [backendMessage, setBackendMessage] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set([0]));
-  const [selectedCategory, setSelectedCategory] = useState(0); // Track which category is selected for the card
+  const [selectedCategory, setSelectedCategory] = useState(0);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const templateId = searchParams.get('template');
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-
     if (!token) {
       navigate("/signin");
       return;
     }
 
-    fetch(`${backendUrl}/api/request-quotation/`, {
-      headers: {
-        'Authorization': `Token ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          if (response.status === 401) {
-            navigate("/signin");
-          }
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => setBackendMessage(data.message))
-      .catch((error) =>
-        setBackendMessage(`Failed to connect to backend: ${error.message}`)
-      );
-  }, [backendUrl, navigate]);
+    if (editId) {
+      fetchDraftDetails(editId, token);
+    } else if (templateId) {
+      fetchTemplateDetails(templateId);
+    }
+  }, [navigate, editId, templateId]);
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const fetchTemplateDetails = async (id: string) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/works/`);
+      if (response.ok) {
+        const data = await response.json();
+        const template = data.works.find((w: any) => w.quotation_id === id);
+        if (template) {
+          if (template.selected_services && Array.isArray(template.selected_services)) {
+            setSelectedServices(template.selected_services.map((s: any) => s.name));
+          }
+          setFormData((prev: any) => ({
+            ...prev,
+            duration: template.duration,
+          }));
+          setBackendMessage("Template loaded successfully.");
+          // Clear message
+          setTimeout(() => setBackendMessage(""), 3000);
+        }
+      }
+    } catch (e) { console.error(e); }
   };
 
-  const handleSubmit = async (e) => {
+  const fetchDraftDetails = async (id: string, token: string) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/quotations/${id}/`, {
+        headers: { 'Authorization': `Token ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Pre-fill form
+        // Populate selectedServices from data.selected_services (array of objects {name, ...})
+        if (data.selected_services && Array.isArray(data.selected_services)) {
+          setSelectedServices(data.selected_services.map((s: any) => s.name));
+        }
+        // Populate formData
+        setFormData({
+          duration: data.duration,
+          additional_info: data.additional_info,
+          contact_method: data.contact_method
+        });
+      } else {
+        setBackendMessage("Failed to load draft details.");
+      }
+    } catch (error) {
+      console.error("Error fetching draft:", error);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent, isDraft: boolean = false) => {
     e.preventDefault();
+
+    // Calculate totals
+    const totals = calculateTotals();
+
+    // Prepare full service details for the backend
+    const fullSelectedServices = selectedServices.map(name => {
+      const s = getServiceByName(name);
+      return s ? {
+        name: s.name,
+        priceNaira: s.priceNaira,
+        priceDollar: s.priceDollar,
+        note: s.note
+      } : null;
+    }).filter(s => s !== null);
+
     const quotationData = {
-      ...formData,
-      services: selectedServices,
+      selected_services: fullSelectedServices,
+      price_estimate_min_naira: totals.totalMinNaira,
+      price_estimate_max_naira: totals.totalMaxNaira,
+      price_estimate_min_dollar: totals.totalMinDollar,
+      price_estimate_max_dollar: totals.totalMaxDollar,
+      duration: formData.duration || "",
+      additional_info: formData.additional_info || "",
+      contact_method: formData.contact_method || "",
+      status: isDraft ? 'Draft' : 'Pending'
     };
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${backendUrl}/api/request-quotation/`, {
-        method: 'POST',
+      let url = `${backendUrl}/api/quotations/submit/`;
+      let method = 'POST';
+
+      // If we are editing an existing draft, use UPDATE endpoint
+      if (editId) {
+        url = `${backendUrl}/api/quotations/${editId}/update/`;
+        method = 'PUT';
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`,
@@ -72,17 +140,20 @@ const RequestQuotation = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit quotation request');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
       }
 
       const result = await response.json();
-      setBackendMessage(result.message || "Quotation request submitted successfully!");
-      // Optionally redirect or clear the form
-      navigate("/quotations");
+      setBackendMessage(isDraft ? "Draft saved successfully!" : "Quotation submitted successfully! Redirecting...");
 
-    } catch (error) {
+      setTimeout(() => {
+        navigate("/quotations");
+      }, 1500);
+
+    } catch (error: any) {
       console.error("Error submitting quotation:", error);
-      setBackendMessage("Failed to submit request. Please try again.");
+      setBackendMessage(error.message || "Failed to submit request. Please try again.");
     }
   };
 
@@ -603,6 +674,7 @@ const RequestQuotation = () => {
                     type="button"
                     variant="outline"
                     className="border-border text-foreground hover:bg-muted/50"
+                    onClick={(e) => handleSubmit(e as any, true)}
                   >
                     Save as Draft
                   </Button>

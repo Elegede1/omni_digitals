@@ -26,7 +26,7 @@ const Quotations = () => {
       return;
     }
 
-    fetch(`${backendUrl}/api/quotation/`, {
+    fetch(`${backendUrl}/api/quotations/`, {
       headers: {
         'Authorization': `Token ${token}`,
       },
@@ -34,16 +34,15 @@ const Quotations = () => {
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401) {
-            navigate("/signin"); // Redirect to signin if not authenticated
+            navigate("/signin");
           }
           throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
-        setBackendMessage(data.message)
         if (data.quotations) {
-          setQuotations(data.quotations)
+          setQuotations(data.quotations);
         }
       })
       .catch((error) =>
@@ -51,14 +50,66 @@ const Quotations = () => {
       );
   }, [backendUrl, navigate]);
 
-  const handleViewQuotation = (quotationId) => {
-    // Logic to view quotation, maybe open a modal or a new page
+  const handleViewQuotation = (quotationId: string) => {
+    // Logic to view quotation
     console.log("Viewing quotation:", quotationId);
   };
 
-  const handleDownloadQuotation = (quotationId) => {
-    // Logic to download quotation PDF
-    window.open(`${backendUrl}/api/quotation/${quotationId}/download/`, '_blank');
+  const handleDeleteQuotation = async (quotationId: string) => {
+    if (!confirm("Are you sure you want to delete this quotation?")) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${backendUrl}/api/quotations/${quotationId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete quotation');
+      }
+
+      // Remove from state
+      setQuotations(prev => prev.filter((q: any) => q.quotation_id !== quotationId));
+      setBackendMessage("Quotation deleted successfully.");
+
+      // Clear message after delay
+      setTimeout(() => setBackendMessage(""), 3000);
+
+    } catch (error) {
+      console.error('Delete error:', error);
+      setBackendMessage("Failed to delete quotation. Please try again.");
+    }
+  };
+
+  const handleDownloadQuotation = async (quotationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${backendUrl}/api/quotations/${quotationId}/download/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `quotation_${quotationId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download error:', error);
+      setBackendMessage("Failed to download PDF. Please try again.");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -66,10 +117,13 @@ const Quotations = () => {
       case 'pending':
         return 'bg-yellow-500/20 text-yellow-500';
       case 'approved':
+      case 'reviewed':
         return 'bg-green-500/20 text-green-500';
+      case 'in progress':
       case 'in-review':
         return 'bg-blue-500/20 text-blue-500';
       case 'rejected':
+      case 'cancelled':
         return 'bg-red-500/20 text-red-500';
       case 'completed':
         return 'bg-purple-500/20 text-purple-500';
@@ -145,7 +199,72 @@ const Quotations = () => {
           </CardContent>
         </Card>
 
-        {/* Quotations Table */}
+        {/* Drafts Section */}
+        {quotations.filter((q: any) => q.status === 'Draft').length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-foreground mb-4">Saved Drafts</h2>
+            <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+              <CardContent className="pt-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border/50">
+                        <th className="text-left py-4 text-sm font-semibold text-foreground">Draft ID</th>
+                        <th className="text-left py-4 text-sm font-semibold text-foreground">Services</th>
+                        <th className="text-left py-4 text-sm font-semibold text-foreground">Price Estimate (₦ / $)</th>
+                        <th className="text-left py-4 text-sm font-semibold text-foreground">Saved On</th>
+                        <th className="text-left py-4 text-sm font-semibold text-foreground">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quotations.filter((q: any) => q.status === 'Draft').map((quote: any, index) => (
+                        <tr key={index} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                          <td className="py-4">
+                            <span className="font-medium text-primary">{quote.quotation_id}</span>
+                          </td>
+                          <td className="py-4">
+                            <span className="text-sm text-foreground">
+                              {quote.selected_services.length} services
+                              <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                {quote.selected_services.map((s: any) => s.name).join(", ")}
+                              </div>
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <span className="text-sm text-foreground block">
+                              ₦{parseFloat(quote.price_estimate_min_naira).toLocaleString()} - ₦{parseFloat(quote.price_estimate_max_naira).toLocaleString()}
+                            </span>
+                            <span className="text-sm text-muted-foreground block">
+                              ${parseFloat(quote.price_estimate_min_dollar).toLocaleString()} - ${parseFloat(quote.price_estimate_max_dollar).toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(quote.created_at).toLocaleDateString()}
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <div className="flex space-x-2">
+                              <Button onClick={() => navigate(`/request-quotation?edit=${quote.quotation_id}`)} variant="outline" size="sm" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                                Edit Draft
+                              </Button>
+                              <Button onClick={() => handleDeleteQuotation(quote.quotation_id)} variant="destructive" size="sm">
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Submitted Quotations Table */}
+        <h2 className="text-xl font-bold text-foreground mb-4">Submitted Quotations</h2>
         <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
           <CardContent className="pt-6">
             <div className="overflow-x-auto">
@@ -153,46 +272,55 @@ const Quotations = () => {
                 <thead>
                   <tr className="border-b border-border/50">
                     <th className="text-left py-4 text-sm font-semibold text-foreground">Quote ID</th>
-                    <th className="text-left py-4 text-sm font-semibold text-foreground">Client Type</th>
-                    <th className="text-left py-4 text-sm font-semibold text-foreground">Requested Services</th>
-                    <th className="text-left py-4 text-sm font-semibold text-foreground">Service Package</th>
+                    <th className="text-left py-4 text-sm font-semibold text-foreground">Services</th>
+                    <th className="text-left py-4 text-sm font-semibold text-foreground">Price Estimate (₦ / $)</th>
                     <th className="text-left py-4 text-sm font-semibold text-foreground">Date</th>
                     <th className="text-left py-4 text-sm font-semibold text-foreground">Status</th>
                     <th className="text-left py-4 text-sm font-semibold text-foreground">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {quotations.map((quote, index) => (
+                  {quotations.filter((q: any) => q.status !== 'Draft').map((quote: any, index) => (
                     <tr key={index} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                       <td className="py-4">
-                        <span className="font-medium text-primary">{quote.id}</span>
+                        <span className="font-medium text-primary">{quote.quotation_id}</span>
                       </td>
                       <td className="py-4">
-                        <span className="text-sm text-foreground">Individual</span>
+                        <span className="text-sm text-foreground">
+                          {quote.selected_services.length} services
+                          <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {quote.selected_services.map((s: any) => s.name).join(", ")}
+                          </div>
+                        </span>
                       </td>
                       <td className="py-4">
-                        <span className="text-sm text-foreground">{quote.service}</span>
+                        <span className="text-sm text-foreground block">
+                          ₦{parseFloat(quote.price_estimate_min_naira).toLocaleString()} - ₦{parseFloat(quote.price_estimate_max_naira).toLocaleString()}
+                        </span>
+                        <span className="text-sm text-muted-foreground block">
+                          ${parseFloat(quote.price_estimate_min_dollar).toLocaleString()} - ${parseFloat(quote.price_estimate_max_dollar).toLocaleString()}
+                        </span>
                       </td>
                       <td className="py-4">
-                        <Badge className="bg-primary/20 text-primary">
-                          {quote.package}
-                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(quote.created_at).toLocaleDateString()}
+                        </span>
                       </td>
                       <td className="py-4">
-                        <span className="text-sm text-muted-foreground">{quote.date}</span>
-                      </td>
-                      <td className="py-4">
-                        <Badge className={getStatusColor(quote.status)}>
+                        <Badge className={getStatusColor(quote.status.toLowerCase())}>
                           {quote.status}
                         </Badge>
                       </td>
                       <td className="py-4">
                         <div className="flex space-x-2">
-                          <Button onClick={() => handleViewQuotation(quote.id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
+                          <Button onClick={() => handleViewQuotation(quote.quotation_id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button onClick={() => handleDownloadQuotation(quote.id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
+                          <Button onClick={() => handleDownloadQuotation(quote.quotation_id)} variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
                             <Download className="h-4 w-4" />
+                          </Button>
+                          <Button onClick={() => handleDeleteQuotation(quote.quotation_id)} variant="destructive" size="sm">
+                            Delete
                           </Button>
                         </div>
                       </td>
