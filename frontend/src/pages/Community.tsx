@@ -8,7 +8,24 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
-import { Search, Heart, MessageCircle, Share } from "lucide-react";
+import { Search, Heart, MessageCircle, Share, Flag } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const Community = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,8 +45,8 @@ const Community = () => {
         return response.json();
       })
       .then((data) => {
-          setBackendMessage(data.message)
-          if(data.posts) setPosts(data.posts)
+        setBackendMessage(data.message)
+        if (data.posts) setPosts(data.posts)
       })
       .catch((error) =>
         setBackendMessage(`Failed to connect to backend: ${error.message}`)
@@ -63,6 +80,49 @@ const Community = () => {
       console.error("Error publishing question:", error);
       setBackendMessage("Failed to publish question. Please try again.");
     }
+  };
+
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [reportType, setReportType] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
+
+  const handleReport = async () => {
+    if (!selectedPostId || !reportType || !reportDescription) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${backendUrl}/api/reports/create/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
+        },
+        body: JSON.stringify({
+          report_type: reportType,
+          description: `Reported Post ID: ${selectedPostId}. ${reportDescription}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit report');
+      }
+
+      setBackendMessage("Report submitted successfully. Thank you for helping keep our community safe.");
+      setReportDialogOpen(false);
+      setReportType("");
+      setReportDescription("");
+      setSelectedPostId(null);
+
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      setBackendMessage("Failed to submit report. Please try again.");
+    }
+  };
+
+  const openReportDialog = (postId: string) => {
+    setSelectedPostId(postId);
+    setReportDialogOpen(true);
   };
 
   const handlePostAction = async (postId, action) => {

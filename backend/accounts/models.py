@@ -103,3 +103,30 @@ class Quotation(models.Model):
             random_suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             self.quotation_id = f"QT-{timestamp}-{random_suffix}"
         super().save(*args, **kwargs)
+
+class Report(models.Model):
+    REPORT_TYPES = [
+        ('Harassment', 'Harassment'),
+        ('Spam', 'Spam'),
+        ('Inappropriate Content', 'Inappropriate Content'),
+        ('Other', 'Other'),
+    ]
+
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Resolved', 'Resolved'),
+        ('Dismissed', 'Dismissed'),
+    ]
+
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reports_filed')
+    report_type = models.CharField(max_length=50, choices=REPORT_TYPES)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Report {self.id} by {self.reporter.email} - {self.status}"

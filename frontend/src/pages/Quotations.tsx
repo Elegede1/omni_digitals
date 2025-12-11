@@ -333,43 +333,16 @@ const Quotations = () => {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="mt-8">
           <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 text-center">
-            <CardContent className="pt-6 pb-6">
-              <h3 className="font-semibold text-foreground mb-2">Need a Quote?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get a custom quotation for your next project
+            <CardContent className="pt-8 pb-8">
+              <h3 className="text-2xl font-semibold text-foreground mb-4">Ready for your next project?</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Whether you need a custom quote, want to compare services, or look for bulk service packages,
+                we are here to help you visualising your ideas.
               </p>
               <Link to="/request-quotation">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get A Quotation
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 text-center">
-            <CardContent className="pt-6 pb-6">
-              <h3 className="font-semibold text-foreground mb-2">Compare Services</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Compare different service packages and pricing
-              </p>
-              <Link to="/request-quotation">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get A Quotation
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95 text-center">
-            <CardContent className="pt-6 pb-6">
-              <h3 className="font-semibold text-foreground mb-2">Bulk Services</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get quotes for multiple services at once
-              </p>
-              <Link to="/request-quotation">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-[200px] shadow-glow hover:shadow-elegant transition-all duration-300">
                   Get A Quotation
                 </Button>
               </Link>

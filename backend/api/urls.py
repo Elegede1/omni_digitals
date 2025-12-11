@@ -16,6 +16,9 @@ from .views import (
     list_all_quotations,
     update_quotation_status,
     list_completed_works,
+    create_report,
+    list_reports,
+    update_report_status,
 )
 
 urlpatterns = [
@@ -30,6 +33,9 @@ urlpatterns = [
     path('admin/quotations/', list_all_quotations, name='list_all_quotations'),
     path('admin/quotations/<str:quotation_id>/status/', update_quotation_status, name='update_quotation_status'),
     path('works/', list_completed_works, name='list_completed_works'),
+    path('reports/create/', create_report, name='create_report'),
+    path('admin/reports/', list_reports, name='list_reports'),
+    path('admin/reports/<int:report_id>/status/', update_report_status, name='update_report_status'),
     path('signin/', signin, name='signin'),
     path('signup/', signup, name='signup'),
     path('chat/', chat, name='chat'),
