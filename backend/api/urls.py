@@ -30,6 +30,7 @@ from .views import (
     mark_notification_read,
     mark_all_notifications_read,
     get_user_details,
+    react_to_message,
 )
 
 urlpatterns = [

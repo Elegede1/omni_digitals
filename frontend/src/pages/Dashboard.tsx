@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [orderData, setOrderData] = useState([]);
   const [benefits, setBenefits] = useState([]);
   const [user, setUser] = useState({ name: "", email: "", avatar: "" });
+  const [notifications, setNotifications] = useState([]);
   const [backendMessage, setBackendMessage] = useState("");
   const navigate = useNavigate();
 
@@ -25,30 +26,51 @@ const Dashboard = () => {
       return;
     }
 
+    // Fetch Dashboard Data
     fetch(`${backendUrl}/api/dashboard/`, {
-      headers: {
-        'Authorization': `Token ${token}`, // Use 'Token' scheme for Django REST Framework
-      },
+      headers: { 'Authorization': `Token ${token}` },
     })
-      .then((response) => {
-        if (!response.ok) {
-          if (response.status === 401 || response.status === 403) {
-            navigate("/signin"); // Redirect if token is invalid or expired
-          }
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
         setBackendMessage(data.message);
         if (data.orderData) setOrderData(data.orderData);
         if (data.benefits) setBenefits(data.benefits);
         if (data.user) setUser(data.user);
       })
-      .catch((error) =>
-        setBackendMessage(`Failed to connect to backend: ${error.message}`)
-      );
+      .catch((err) => console.error("Dashboard error:", err));
+
+    // Fetch Notifications
+    fetch(`${backendUrl}/api/notifications/`, {
+      headers: { 'Authorization': `Token ${token}` },
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.notifications) setNotifications(data.notifications);
+      })
+      .catch(err => console.error("Notification error:", err));
+
   }, [backendUrl, navigate]);
+
+  const handleNotificationClick = async (notif: any) => {
+    // Mark as read
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${backendUrl}/api/notifications/${notif.id}/read/`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Token ${token}` }
+      });
+
+      // Update local state
+      setNotifications(prev => prev.map((n: any) => n.id === notif.id ? { ...n, is_read: true } : n));
+
+      // Redirect
+      if (notif.related_url) {
+        navigate(notif.related_url);
+      }
+    } catch (err) {
+      console.error("Failed to mark read", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,26 +106,33 @@ const Dashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {/* Mock Notifications for now - in future fetch from backend */}
-                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-semibold text-sm text-foreground">Admin Message</h4>
-                        <span className="text-[10px] text-muted-foreground">Just now</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Welcome to Omni Digitals! We are excited to work with you.
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-semibold text-sm text-foreground">Community Reply</h4>
-                        <span className="text-[10px] text-muted-foreground">2 hrs ago</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        John replied to your post "SEO Tips for 2025".
-                      </p>
-                    </div>
+                  <div className="space-y-4 max-h-[300px] overflow-y-auto">
+                    {/* Real Notifications from Backend */}
+                    {notifications.length > 0 ? (
+                      notifications.map((notif: any) => (
+                        <div
+                          key={notif.id}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${notif.is_read ? 'bg-muted/30 border-border/30' : 'bg-primary/10 border-primary/20 hover:bg-primary/15'}`}
+                          onClick={() => handleNotificationClick(notif)}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className={`font-semibold text-sm ${notif.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>
+                              {notif.type === 'admin_message' ? 'Admin Message' :
+                                notif.type === 'post_like' ? 'New Like' :
+                                  notif.type === 'comment_like' ? 'New Like' :
+                                    notif.type === 'comment_reply' ? 'New Comment' :
+                                      notif.type === 'welcome' ? 'Welcome' : 'Notification'}
+                            </h4>
+                            <span className="text-[10px] text-muted-foreground">{new Date(notif.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {notif.message}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-sm text-muted-foreground py-4">No notifications yet.</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

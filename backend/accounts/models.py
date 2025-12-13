@@ -258,3 +258,35 @@ class CommentLike(models.Model):
 
     def __str__(self):
         return f"{self.user.email} liked comment {self.comment.id}"
+
+
+class Message(models.Model):
+    """Message model for internal chat system."""
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='replies')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Message from {self.sender} to {self.recipient}"
+
+class MessageReaction(models.Model):
+    """Reaction to a chat message."""
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    emoji = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['message', 'user', 'emoji'] # One type of emoji per user per message? Or just unique user/message? Let's allow multiple emojis per user for now, or restrict. Usually one reaction per user per message is common, or different types. Let's stick to unique user+emoji or just allow any. The prompt says "allow emoji reactions".
+        # Let's enforce unique emoji per user per message to prevent spamming SAME emoji.
+        unique_together = ['message', 'user', 'emoji']
+
+    def __str__(self):
+        return f"{self.user} reacted {self.emoji} to {self.message.id}"

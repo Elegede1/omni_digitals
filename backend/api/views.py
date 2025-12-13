@@ -220,10 +220,209 @@ def quotation(request):
 def request_quotation(request):
     return Response({"message": "request_quotation endpoint"})
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def chat(request):
-    return Response({"message": "chat endpoint"})
+    from accounts.models import Message, User, Profile
+    from django.db.models import Q
+    from django.shortcuts import get_object_or_404
+
+    # GET: Fetch Messages or Users
+    if request.method == 'GET':
+        recipient_identifier = request.query_params.get('recipient') # email or id
+        
+        # If recipient specified, return messages
+        if recipient_identifier:
+            try:
+                # Try ID first
+                if recipient_identifier.isdigit():
+                    other_user = User.objects.get(id=int(recipient_identifier))
+                else:
+                    # Try email
+                    other_user = User.objects.get(email=recipient_identifier)
+            except User.DoesNotExist:
+                # Try finding by name (fallback for existing frontend logic)
+                other_user = User.objects.filter(
+                    Q(first_name__icontains=recipient_identifier) | 
+                    Q(last_name__icontains=recipient_identifier)
+                ).first()
+            
+            if not other_user:
+                return Response({"messages": [], "error": "User not found"})
+
+            msgs = Message.objects.filter(
+                Q(sender=request.user, recipient=other_user) | 
+                Q(sender=other_user, recipient=request.user)
+            ).order_by('created_at')
+            
+            messages_data = [{
+                "id": m.id,
+                "text": m.content,
+                "sender": "me" if m.sender == request.user else "other",
+                "time": m.created_at.strftime("%I:%M %p"),
+                "reply_to": m.reply_to_id,
+                "is_read": m.is_read,
+                "reactions": [{"emoji": r.emoji, "user": r.user.get_full_name() or r.user.email} for r in m.reactions.all()]
+            } for m in msgs]
+            
+            # Mark received messages as read
+            msgs.filter(recipient=request.user, is_read=False).update(is_read=True)
+            
+            return Response({"messages": messages_data, "recipient": {
+                "name": other_user.get_full_name() or other_user.email,
+                "email": other_user.email,
+                "id": other_user.id
+            }})
+
+        # Else return list of contacts
+        else:
+            contacts = []
+            if request.user.is_superuser:
+                # Admins see everyone who messaged them OR is a client
+                # Simplify: List all users who have sent a message + All users with a profile?
+                # For high scale this is bad, but for v1 it works.
+                # Let's list users who have messages OR are recently active.
+                related_users = User.objects.filter(
+                    Q(sent_messages__recipient=request.user) | 
+                    Q(received_messages__sender=request.user)
+                ).distinct()
+                
+                # Also include all users if list is small? No, stick to interactions.
+                for u in related_users:
+                    contacts.append({
+                        "name": u.get_full_name() or u.email.split('@')[0],
+                        "email": u.email,
+                        "avatar": u.profile.profile_picture.url if hasattr(u, 'profile') and u.profile.profile_picture else "",
+                        "time": "Recent", # TODO: real last msg time
+                        "online": True # Mock
+                    })
+            else:
+                # Regular users see Admins
+                admins = User.objects.filter(is_superuser=True)
+                for a in admins:
+                    contacts.append({
+                        "name": a.get_full_name() or "Support Team",
+                        "email": a.email,
+                        "avatar": a.profile.profile_picture.url if hasattr(a, 'profile') and a.profile.profile_picture else "",
+                        "time": "Always",
+                        "online": True
+                    })
+            
+            return Response({"users": contacts})
+
+    # POST: Send Message
+    elif request.method == 'POST':
+        recipient_identifier = request.data.get('recipient')
+        content = request.data.get('message')
+        reply_to_id = request.data.get('reply_to')
+        
+        if not content or not recipient_identifier:
+            return Response({"error": "Message and recipient required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Resolve Recipient
+        other_user = None
+        # Try ID, Email, Name
+        if str(recipient_identifier).isdigit():
+             other_user = User.objects.filter(id=int(recipient_identifier)).first()
+        if not other_user:
+             other_user = User.objects.filter(email=recipient_identifier).first()
+        if not other_user:
+             other_user = User.objects.filter(
+                Q(first_name__icontains=recipient_identifier) | 
+                Q(last_name__icontains=recipient_identifier)
+             ).first()
+        
+        if not other_user:
+             return Response({"error": "Recipient not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        msg = Message.objects.create(
+            sender=request.user,
+            recipient=other_user,
+            content=content,
+            reply_to_id=reply_to_id
+        )
+        
+        # Notify Recipient
+        from accounts.models import Notification
+        Notification.objects.create(
+            user=other_user,
+            message=f"New message from {request.user.get_full_name() or request.user.email}",
+            notification_type='admin_message', # Reusing this type for generic messages
+            related_url='/chat'
+        )
+        
+        return Response({
+            "id": msg.id,
+            "text": msg.content,
+            "sender": "me",
+            "time": msg.created_at.strftime("%I:%M %p"),
+            "reply_to": msg.reply_to_id,
+            "reactions": [] 
+        }, status=status.HTTP_201_CREATED)
+
+    # PUT: Edit Message
+    elif request.method == 'PUT':
+        msg_id = request.data.get('id')
+        new_content = request.data.get('content')
+        
+        if not msg_id or not new_content:
+             return Response({"error": "ID and content required"}, status=status.HTTP_400_BAD_REQUEST)
+             
+        msg = get_object_or_404(Message, id=msg_id, sender=request.user)
+        msg.content = new_content
+        msg.save()
+        
+        return Response({"message": "Updated successfully", "text": msg.content})
+
+    # DELETE: Delete Message
+    elif request.method == 'DELETE':
+        msg_id = request.query_params.get('id') or request.data.get('id')
+        
+        if not msg_id:
+            return Response({"error": "ID required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        msg.delete()
+        
+        return Response({"message": "Deleted successfully"})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def react_to_message(request, message_id):
+    """
+    react_to_message: Toggle reaction on a message
+    """
+    from accounts.models import Message, MessageReaction, Notification
+    from django.shortcuts import get_object_or_404
+    
+    msg = get_object_or_404(Message, id=message_id)
+    emoji = request.data.get('emoji')
+    
+    if not emoji:
+        return Response({"error": "Emoji required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check existence
+    existing = MessageReaction.objects.filter(message=msg, user=request.user, emoji=emoji).first()
+    
+    if existing:
+        existing.delete()
+        action = "removed"
+    else:
+        MessageReaction.objects.create(message=msg, user=request.user, emoji=emoji)
+        action = "added"
+        
+        # Notify Sender if not self
+        if msg.sender != request.user:
+            Notification.objects.create(
+                user=msg.sender,
+                message=f"{request.user.get_full_name() or request.user.email} reacted {emoji} to your message",
+                notification_type='admin_message', # Or specific 'reaction' type
+                related_url='/chat'
+            )
+
+    return Response({
+        "status": action,
+        "reactions": [{"emoji": r.emoji, "user": r.user.get_full_name() or r.user.email} for r in msg.reactions.all()]
+    })
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -287,12 +486,51 @@ def submit_quotation(request):
                 # For drafts this is fine, but for final submit we might want to know
                 pdf_path = None
             
-            # Send email to admin
+        # Send email to admin
             if pdf_path:
                 try:
                     send_quotation_to_admin(quotation, pdf_path)
                 except Exception as e:
                     print(f"Email sending error: {str(e)}")
+
+            # -----------------------------------------------------------
+            # NEW: Send automated message to Admin (Requirement 1)
+            # -----------------------------------------------------------
+            try:
+                from accounts.models import Message
+                from django.contrib.auth import get_user_model
+                
+                User = get_user_model()
+                # Find an admin to receive the message (e.g. first superuser)
+                admin_user = User.objects.filter(is_superuser=True).first()
+                
+                if admin_user:
+                    # Construct message content
+                    msg_content = f"New Quotation Request ({quotation.quotation_id})\n" \
+                                  f"Services: {', '.join(quotation.selected_services)}\n" \
+                                  f"Budget: {quotation.price_estimate_min_naira} - {quotation.price_estimate_max_naira} NGN\n" \
+                                  f"Duration: {quotation.duration}\n" \
+                                  f"Auto-generated from submission."
+                    
+                    Message.objects.create(
+                        sender=request.user,
+                        recipient=admin_user,
+                        content=msg_content
+                    )
+                    
+                    # -----------------------------------------------------------
+                    # NEW: Create Notification for Admin (Requirement 1 & 4)
+                    # -----------------------------------------------------------
+                    from accounts.models import Notification
+                    Notification.objects.create(
+                        user=admin_user,
+                        message=f"New Quotation Request from {request.user.email} ({quotation.quotation_id})",
+                        notification_type='admin_message',
+                        related_url='/dashboard' # Or specific admin quotation view if available
+                    )
+                    
+            except Exception as e:
+                print(f"Auto-message error: {str(e)}")
         
         return Response({
             "message": "Quotation submitted successfully" if status_val == 'Pending' else "Draft saved successfully",
@@ -965,8 +1203,16 @@ def toggle_post_like(request, post_id):
     else:
         # Like
         PostLike.objects.create(post=post, user=request.user)
-        post.likes += 1
-        post.save()
+        if post.user and post.user != request.user:
+            from accounts.models import Notification
+            Notification.objects.create(
+                user=post.user,
+                message=f"{request.user.get_full_name() or request.user.email} liked your post: {post.title[:30]}",
+                notification_type='post_like', # We'll need to handle this type in frontend or defaulting
+                related_post=post,
+                related_url=f"/community?post={post.id}"
+            )
+            
         return Response({'liked': True, 'likes': post.likes})
 
 
@@ -995,4 +1241,15 @@ def toggle_comment_like(request, comment_id):
         CommentLike.objects.create(comment=comment, user=request.user)
         comment.likes += 1
         comment.save()
+
+        if comment.user and comment.user != request.user:
+            from accounts.models import Notification
+            Notification.objects.create(
+                user=comment.user,
+                message=f"{request.user.get_full_name() or request.user.email} liked your comment on: {comment.post.title[:20]}",
+                notification_type='comment_like',
+                related_post=comment.post,
+                related_url=f"/community?post={comment.post.id}"
+            )
+        
         return Response({'liked': True, 'likes': comment.likes})
