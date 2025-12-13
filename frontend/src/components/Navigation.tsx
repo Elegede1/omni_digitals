@@ -14,20 +14,107 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+interface Notification {
+  id: number;
+  message: string;
+  type: string;
+  is_read: boolean;
+  related_url: string;
+  related_post_id: number | null;
+  created_at: string;
+}
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, userAvatar, userEmail, logout } = useAuth();
   const navigate = useNavigate();
-  const [hasNotifications, setHasNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Mock notification check - in real app, fetch from backend
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+
+  // Fetch notifications from API
   useEffect(() => {
     if (isAuthenticated) {
-      // Simulate a notification for demo purposes
-      setHasNotifications(true);
+      fetchNotifications();
     }
   }, [isAuthenticated]);
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${backendUrl}/api/notifications/`, {
+        headers: { 'Authorization': `Token ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const markAsRead = async (notificationId: number, relatedUrl: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${backendUrl}/api/notifications/${notificationId}/read/`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Token ${token}` }
+      });
+
+      // Update local state
+      setNotifications(prev =>
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+
+      // Navigate to related content
+      if (relatedUrl) {
+        navigate(relatedUrl);
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${backendUrl}/api/notifications/read-all/`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Token ${token}` }
+      });
+
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
 
   const isAdmin = userEmail === 'admin@omnidigitals.com';
 
@@ -45,12 +132,12 @@ const Navigation = () => {
             <img
               src={logoLight}
               alt="MNI Digitals"
-              className="h-8 w-auto dark:hidden transition-all duration-300 group-hover:scale-105"
+              className="h-12 w-auto dark:hidden transition-all duration-300 group-hover:scale-105"
             />
             <img
               src={logoDark}
               alt="MNI Digitals"
-              className="h-8 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105"
+              className="h-12 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105"
             />
           </Link>
 
@@ -75,13 +162,54 @@ const Navigation = () => {
             )}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                {/* Notification Bell */}
-                <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10">
-                  <Bell className={`h-5 w-5 ${hasNotifications ? 'animate-pulse text-yellow-500' : ''}`} />
-                  {hasNotifications && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-ping" />
-                  )}
-                </Button>
+                {/* Notification Bell with Popover */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-primary/10">
+                      <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'text-yellow-500' : ''}`} />
+                      {unreadCount > 0 && (
+                        <>
+                          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+                        </>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80 p-0">
+                    <div className="p-3 border-b border-border flex justify-between items-center">
+                      <h4 className="font-semibold">Notifications</h4>
+                      {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
+                          Mark all as read
+                        </Button>
+                      )}
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="p-4 text-sm text-muted-foreground text-center">No notifications</p>
+                      ) : (
+                        notifications.slice(0, 10).map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => markAsRead(notification.id, notification.related_url)}
+                            className={`p-3 border-b border-border/50 cursor-pointer hover:bg-accent transition-colors ${!notification.is_read ? 'bg-primary/5' : ''
+                              }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              {!notification.is_read && (
+                                <span className="h-2 w-2 mt-1.5 rounded-full bg-primary flex-shrink-0" />
+                              )}
+                              <div className="flex-1">
+                                <p className="text-sm line-clamp-2">{notification.message}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{formatTimeAgo(notification.created_at)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
                 {/* User Dropdown */}
                 <DropdownMenu>
@@ -179,8 +307,11 @@ const Navigation = () => {
                         </Avatar>
                         <span className="text-sm font-medium">{userEmail}</span>
                       </div>
-                      <Button variant="ghost" size="icon">
-                        <Bell className={`h-5 w-5 ${hasNotifications ? 'text-yellow-500' : ''}`} />
+                      <Button variant="ghost" size="icon" className="relative">
+                        <Bell className={`h-5 w-5 ${unreadCount > 0 ? 'text-yellow-500' : ''}`} />
+                        {unreadCount > 0 && (
+                          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+                        )}
                       </Button>
                     </div>
                     <Link to={isAdmin ? "/admin" : "/dashboard"} className="flex items-center gap-2 p-2 hover:bg-accent rounded">

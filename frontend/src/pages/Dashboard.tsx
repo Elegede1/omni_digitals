@@ -213,11 +213,13 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-          <Footer />
-          <DarkModeToggle />
+          </CardContent>
+        </Card>
+        <Footer />
+        <DarkModeToggle />
       </div>
-      );
+    </div>
+  );
 };
 
-      export default Dashboard;
+export default Dashboard;

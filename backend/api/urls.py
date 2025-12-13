@@ -19,10 +19,22 @@ from .views import (
     create_report,
     list_reports,
     update_report_status,
+    community_posts,
+    community_post_detail,
+    post_comments,
+    comment_detail,
+    toggle_post_like,
+    toggle_comment_like,
+    get_notifications,
+    mark_notification_read,
+    mark_notification_read,
+    mark_all_notifications_read,
+    get_user_details,
 )
 
 urlpatterns = [
     path('health/', health_check, name='health_check'),
+    path('auth/me/', get_user_details, name='get_user_details'),
     path('membership-billing/', membership_billing, name='membership_billing'),
     path('profile/', profile, name='profile'),
     path('quotations/submit/', submit_quotation, name='submit_quotation'),
@@ -41,4 +53,15 @@ urlpatterns = [
     path('chat/', chat, name='chat'),
     path('community/', community, name='community'),
     path('dashboard/', dashboard_data, name='dashboard'),
+    # Community Posts
+    path('community/posts/', community_posts, name='community_posts'),
+    path('community/posts/<int:post_id>/', community_post_detail, name='community_post_detail'),
+    path('community/posts/<int:post_id>/comments/', post_comments, name='post_comments'),
+    path('community/posts/<int:post_id>/like/', toggle_post_like, name='toggle_post_like'),
+    path('community/comments/<int:comment_id>/', comment_detail, name='comment_detail'),
+    path('community/comments/<int:comment_id>/like/', toggle_comment_like, name='toggle_comment_like'),
+    # Notifications
+    path('notifications/', get_notifications, name='get_notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/read-all/', mark_all_notifications_read, name='mark_all_notifications_read'),
 ]

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +42,7 @@ const SignIn = () => {
 
       if (response.ok) {
         console.log("Sign in successful:", data);
-        login(data.token, data.avatar_url, data.email);
+        login(data.token, data.avatar_url, data.email, data.user_id);
         navigate('/profile');
       } else {
         setBackendMessage(data.error || "An unknown error occurred.");

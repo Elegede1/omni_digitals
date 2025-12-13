@@ -130,3 +130,131 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report {self.id} by {self.reporter.email} - {self.status}"
+
+
+class CommunityPost(models.Model):
+    """Community post model - supports both registered and guest users."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='community_posts'
+    )
+    guest_name = models.CharField(max_length=100, blank=True)
+    guest_email = models.EmailField(blank=True)
+    title = models.CharField(max_length=300)
+    content = models.TextField()
+    tags = models.JSONField(default=list, blank=True)
+    likes = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        author = self.user.email if self.user else self.guest_name
+        return f"{self.title[:50]} by {author}"
+
+    @property
+    def author_name(self):
+        if self.user:
+            return self.user.get_full_name() or self.user.email
+        return self.guest_name
+
+    @property
+    def author_avatar(self):
+        if self.user and hasattr(self.user, 'profile') and self.user.profile.profile_picture:
+            return self.user.profile.profile_picture.url
+        return None
+
+
+class Comment(models.Model):
+    """Comment model for community posts."""
+    post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='post_comments'
+    )
+    guest_name = models.CharField(max_length=100, blank=True)
+    guest_email = models.EmailField(blank=True)
+    content = models.TextField()
+    likes = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        author = self.user.email if self.user else self.guest_name
+        return f"Comment by {author} on {self.post.title[:30]}"
+
+    @property
+    def author_name(self):
+        if self.user:
+            return self.user.get_full_name() or self.user.email
+        return self.guest_name
+
+
+class Notification(models.Model):
+    """Notification model for user alerts."""
+    NOTIFICATION_TYPES = [
+        ('welcome', 'Welcome Message'),
+        ('comment_reply', 'Comment Reply'),
+        ('admin_message', 'Admin Message'),
+        ('post_mention', 'Post Mention'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    message = models.TextField()
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES, default='admin_message')
+    is_read = models.BooleanField(default=False)
+    related_post = models.ForeignKey(
+        CommunityPost,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+    related_url = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification for {self.user.email}: {self.message[:50]}"
+
+
+class PostLike(models.Model):
+    """Track likes on posts - one like per user per post."""
+    post = models.ForeignKey(CommunityPost, on_delete=models.CASCADE, related_name='post_likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='liked_posts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['post', 'user']
+
+    def __str__(self):
+        return f"{self.user.email} liked {self.post.title[:30]}"
+
+
+class CommentLike(models.Model):
+    """Track likes on comments - one like per user per comment."""
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='liked_comments')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['comment', 'user']
+
+    def __str__(self):
+        return f"{self.user.email} liked comment {self.comment.id}"
