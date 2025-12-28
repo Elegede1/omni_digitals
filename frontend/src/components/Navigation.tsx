@@ -126,18 +126,18 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50 animate-fade-in">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 cursor-pointer group">
             <img
               src={logoLight}
               alt="MNI Digitals"
-              className="h-12 w-auto dark:hidden transition-all duration-300 group-hover:scale-105"
+              className="h-16 w-auto dark:hidden transition-all duration-300 group-hover:scale-105 mix-blend-multiply"
             />
             <img
               src={logoDark}
               alt="MNI Digitals"
-              className="h-12 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105"
+              className="h-16 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105 mix-blend-lighten"
             />
           </Link>
 

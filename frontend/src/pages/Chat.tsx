@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
-import { Search, Send, MoreVertical } from "lucide-react";
+import { Search, Send, MoreVertical, Reply, Edit, Trash2, Smile, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -19,6 +20,7 @@ const Chat = () => {
   const [backendMessage, setBackendMessage] = useState("");
   const [replyTo, setReplyTo] = useState<any>(null); // Message replying to
   const [editingMessage, setEditingMessage] = useState<any>(null); // Message being edited
+  const [activeReactionId, setActiveReactionId] = useState<number | null>(null); // ID of message with open reaction picker
   const { userEmail, userAvatar } = useAuth();
   const navigate = useNavigate();
 
@@ -220,82 +222,112 @@ const Chat = () => {
 
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((msg, index) => (
-                  <div key={index} className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'}`}>
+                <TooltipProvider>
+                  {messages.map((msg, index) => (
+                    <div key={index} className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'} mb-4`}>
 
-                    {/* Reply Reference */}
-                    {msg.reply_to && (
-                      <div className="text-xs text-muted-foreground mb-1 px-2 border-l-2 border-primary/50">
-                        Replying to message...
-                      </div>
-                    )}
-
-                    <div className="group relative flex items-center gap-2">
-                      {/* Action Buttons (Hover) */}
-                      {msg.sender === 'me' && (
-                        <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                          {/* Reactions (Me) */}
-                          <div className="flex bg-background border rounded-full px-1 shadow-sm mr-2">
-                            {['👍', '❤️', '😂'].map(emoji => (
-                              <button key={emoji} className="p-1 hover:scale-125 transition-transform" onClick={() => handleReaction(msg.id, emoji)}>
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
-                            setEditingMessage(msg);
-                            setMessage(msg.text);
-                            setReplyTo(null);
-                          }}>
-                            <span className="sr-only">Edit</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => handleDeleteMessage(msg.id)}>
-                            <span className="sr-only">Delete</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                          </Button>
+                      {/* Reply Reference */}
+                      {msg.reply_to && (
+                        <div className="text-xs text-muted-foreground mb-1 px-2 border-l-2 border-primary/50">
+                          Replying to message...
                         </div>
                       )}
 
-                      {/* Reply Button (For All) */}
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 items-center">
-                        {msg.sender !== 'me' && (
-                          <div className="flex bg-background border rounded-full px-1 shadow-sm mr-2 z-20">
-                            {['👍', '❤️', '😂'].map(emoji => (
-                              <button key={emoji} className="p-1 hover:scale-125 transition-transform" onClick={() => handleReaction(msg.id, emoji)}>
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
-                          setReplyTo(msg);
-                          setEditingMessage(null);
-                        }}>
-                          <span className="sr-only">Reply</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
-                        </Button>
-                      </div>
+                      <div className={`group relative flex items-end gap-2 max-w-[85%] ${msg.sender === 'me' ? 'flex-row-reverse' : 'flex-row'}`}>
 
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${msg.sender === 'me' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
-                        <p className="text-sm">{msg.text}</p>
-                        <p className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                          {msg.time}
-                        </p>
-                        {/* Reactions Badge */}
-                        {msg.reactions && msg.reactions.length > 0 && (
-                          <div className="absolute -bottom-3 right-0 bg-background border rounded-full px-2 py-0.5 text-xs shadow-sm flex gap-1 items-center z-10 cursor-pointer hover:bg-muted/50">
-                            {Array.from(new Set(msg.reactions.map((r: any) => r.emoji))).slice(0, 3).map((e: any) => (
-                              <span key={e}>{e}</span>
-                            ))}
-                            <span className="text-muted-foreground text-[10px]">{msg.reactions.length}</span>
-                          </div>
-                        )}
+                        {/* Message Bubble */}
+                        <div className={`relative px-4 py-2 rounded-lg ${msg.sender === 'me' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted text-foreground rounded-bl-none'}`}>
+                          <p className="text-sm leading-relaxed">{msg.text}</p>
+                          <p className={`text-[10px] mt-1 text-right ${msg.sender === 'me' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                            {msg.time}
+                          </p>
+
+                          {/* Reactions Badge */}
+                          {msg.reactions && msg.reactions.length > 0 && (
+                            <div className="absolute -bottom-3 right-0 bg-background/95 border rounded-full px-2 py-0.5 text-xs shadow-sm flex gap-1 items-center z-10 cursor-pointer hover:bg-muted/50">
+                              {Array.from(new Set(msg.reactions.map((r: any) => r.emoji))).slice(0, 3).map((e: any) => (
+                                <span key={e}>{e}</span>
+                              ))}
+                              <span className="text-muted-foreground text-[10px]">{msg.reactions.length}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons (Hover) */}
+                        <div className={`opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity bg-background/80 backdrop-blur-sm rounded-lg p-1 border shadow-sm ${activeReactionId === msg.id ? 'opacity-100' : ''}`}>
+
+                          {/* Emoji Picker Overlay */}
+                          {activeReactionId === msg.id && (
+                            <div className="absolute bottom-full mb-2 flex gap-1 bg-card border rounded-lg p-1 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-200">
+                              {['👍', '❤️', '😂', '😮', '😢', '🔥'].map(emoji => (
+                                <button
+                                  key={emoji}
+                                  className="p-1.5 hover:bg-muted rounded text-lg transition-transform hover:scale-110"
+                                  onClick={() => { handleReaction(msg.id, emoji); setActiveReactionId(null); }}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                              <button onClick={() => setActiveReactionId(null)} className="p-1 hover:bg-muted rounded"><X className="h-3 w-3" /></button>
+                            </div>
+                          )}
+
+                          {/* Reply */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                                setReplyTo(msg);
+                                setEditingMessage(null);
+                              }}>
+                                <Reply className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Reply</TooltipContent>
+                          </Tooltip>
+
+                          {/* Edit/Delete (Me Only) */}
+                          {msg.sender === 'me' && (
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                                    setEditingMessage(msg);
+                                    setMessage(msg.text);
+                                    setReplyTo(null);
+                                  }}>
+                                    <Edit className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit</TooltipContent>
+                              </Tooltip>
+
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-600" onClick={() => handleDeleteMessage(msg.id)}>
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete</TooltipContent>
+                              </Tooltip>
+                            </>
+                          )}
+
+                          {/* Reaction Trigger */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setActiveReactionId(activeReactionId === msg.id ? null : msg.id)}>
+                                <Smile className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>React</TooltipContent>
+                          </Tooltip>
+
+                        </div>
+
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </TooltipProvider>
               </CardContent>
 
               {/* Input */}

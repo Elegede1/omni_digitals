@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Facebook, Instagram, Linkedin, Heart, ThumbsUp, Share2, MapPin } from "lucide-react";
 
+import logoLight from "@/assets/logo-light.png";
+import logoDark from "@/assets/logo-dark.png";
+
 // Icon configuration with properties
 const iconConfig = [
   { id: 'facebook', Icon: Facebook, size: 16, iconSize: 8, color: 'text-primary' },
@@ -90,10 +93,24 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-hero overflow-hidden pt-20">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.02%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
 
-      <div className="container mx-auto px-4 py-24 relative z-10">
+      <div className="container mx-auto px-4 pt-1 pb-8 relative z-10">
+        {/* Large Left-Aligned Logo */}
+        <div className="flex justify-start mb-1 animate-fade-in">
+          <img
+            src={logoLight}
+            alt="Omni Digitals Logo"
+            className="h-40 md:h-64 w-auto dark:hidden transition-all duration-300 hover:scale-105 mix-blend-multiply"
+          />
+          <img
+            src={logoDark}
+            alt="Omni Digitals Logo"
+            className="h-40 md:h-64 w-auto hidden dark:block transition-all duration-300 hover:scale-105 mix-blend-lighten"
+          />
+        </div>
+
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8 animate-fade-in">
