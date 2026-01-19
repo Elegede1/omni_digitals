@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import { ChevronDown, HelpCircle, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -685,8 +684,7 @@ const RequestQuotation = () => {
         </form>
       </div>
       <Footer />
-      <DarkModeToggle />
-    </div>
+          </div>
   );
 };
 

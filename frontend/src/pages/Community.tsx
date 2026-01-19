@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import { Search, Heart, MessageCircle, Share, Flag, Edit, ChevronDown, ChevronUp, Send, Trash2, MoreHorizontal, X } from "lucide-react";
 import {
   Dialog,
@@ -671,8 +670,7 @@ const Community = () => {
         </Dialog>
 
         <Footer />
-        <DarkModeToggle />
-      </div>
+              </div>
     </TooltipProvider>
   );
 };

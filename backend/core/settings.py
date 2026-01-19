@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     # Local apps
     "accounts",
     "api",
+    "omni_assist",  # Omni Assist AI
     # Third-party apps
     "rest_framework",
     "rest_framework.authtoken",
@@ -257,3 +258,11 @@ else:
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@omnidigitals.com')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@omnidigitals.com')
+
+# Omni Assist AI Configuration (Hugging Face)
+# ============================================
+HF_API_KEY = os.environ.get('HF_API_KEY', '')
+OMNI_ASSIST_MODEL = os.environ.get('OMNI_ASSIST_MODEL', 'openai/gpt-oss-120b')
+OMNI_ASSIST_MAX_TOKENS = int(os.environ.get('OMNI_ASSIST_MAX_TOKENS', '1000'))
+OMNI_ASSIST_ENABLED = os.environ.get('OMNI_ASSIST_ENABLED', 'True').lower() == 'true'
+

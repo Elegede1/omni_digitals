@@ -1,9 +1,11 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import logoLight from "@/assets/logo-light.png";
 import logoDark from "@/assets/logo-dark.png";
 
 const Footer = () => {
+  const { isAuthenticated } = useAuth();
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-16">
@@ -56,29 +58,29 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-foreground">Services</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                <Link to={isAuthenticated ? "/request-quotation" : "/signin"} className="text-muted-foreground hover:text-primary transition-colors duration-300">
                   Content Marketing
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                <Link to={isAuthenticated ? "/request-quotation" : "/signin"} className="text-muted-foreground hover:text-primary transition-colors duration-300">
                   Graphic Design
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                <Link to={isAuthenticated ? "/request-quotation" : "/signin"} className="text-muted-foreground hover:text-primary transition-colors duration-300">
                   Video Editing
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                <Link to={isAuthenticated ? "/request-quotation" : "/signin"} className="text-muted-foreground hover:text-primary transition-colors duration-300">
                   Cloud Hosting
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors duration-300">
+                <Link to={isAuthenticated ? "/request-quotation" : "/signin"} className="text-muted-foreground hover:text-primary transition-colors duration-300">
                   Market Research
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

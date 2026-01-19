@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { TrendingUp, Eye, BarChart3, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -245,8 +244,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         <Footer />
-        <DarkModeToggle />
-      </div>
+              </div>
     </div>
   );
 };

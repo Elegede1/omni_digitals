@@ -31,6 +31,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("api/", include("api.urls")),
     path("api/accounts/", include("accounts.urls")),
+    path("api/omni-assist/", include("omni_assist.urls")),  # Omni Assist AI
 ]
 
 if settings.DEBUG:

@@ -4,10 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
-import { Eye, Download, Check, X, CreditCard, Filter } from "lucide-react";
+import AdminAITools from "@/components/AdminAITools";
+import { Eye, Download, Check, X, CreditCard, Filter, FileText, Bot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -130,94 +131,114 @@ const AdminDashboard = () => {
         <div className="min-h-screen bg-background">
             <Navigation />
             <div className="container mx-auto px-4 pt-24 pb-16">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-muted-foreground" />
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Filter by Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="Pending">Pending</SelectItem>
-                                <SelectItem value="Paid">Paid</SelectItem>
-                                <SelectItem value="In Progress">In Progress</SelectItem>
-                                <SelectItem value="Done">Done</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+                <h1 className="text-3xl font-bold text-foreground mb-8">Admin Dashboard</h1>
 
-                <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
-                    <CardContent className="pt-6">
-                        {loading ? <p>Loading...</p> : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b border-border/50 text-left">
-                                            <th className="py-4 px-2">ID</th>
-                                            <th className="py-4 px-2">User</th>
-                                            <th className="py-4 px-2">Services</th>
-                                            <th className="py-4 px-2">Price (₦)</th>
-                                            <th className="py-4 px-2">Status</th>
-                                            <th className="py-4 px-2">Date</th>
-                                            <th className="py-4 px-2">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredQuotations.map((q: any) => (
-                                            <tr key={q.quotation_id} className="border-b border-border/50 hover:bg-muted/30">
-                                                <td className="py-4 px-2 font-medium">{q.quotation_id}</td>
-                                                <td className="py-4 px-2">
-                                                    <div className="flex flex-col">
-                                                        <span>{q.user_name}</span>
-                                                        <span className="text-xs text-muted-foreground">{q.user_email}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-4 px-2 text-sm max-w-[200px] truncate">
-                                                    {q.selected_services.map((s: any) => s.name).join(", ")}
-                                                </td>
-                                                <td className="py-4 px-2 text-sm">
-                                                    ₦{parseFloat(q.price_estimate_min_naira).toLocaleString()}
-                                                </td>
-                                                <td className="py-4 px-2">
-                                                    <Badge className={getStatusColor(q.status)}>{q.status}</Badge>
-                                                </td>
-                                                <td className="py-4 px-2 text-sm text-muted-foreground">
-                                                    {new Date(q.created_at).toLocaleDateString()}
-                                                </td>
-                                                <td className="py-4 px-2">
-                                                    <div className="flex gap-2">
-                                                        <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadQuotation(q.quotation_id)}>
-                                                            <Download className="h-4 w-4" />
-                                                        </Button>
+                <Tabs defaultValue="quotations" className="space-y-6">
+                    <TabsList className="grid w-full max-w-md grid-cols-2">
+                        <TabsTrigger value="quotations" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Quotations
+                        </TabsTrigger>
+                        <TabsTrigger value="ai-tools" className="flex items-center gap-2">
+                            <Bot className="h-4 w-4" />
+                            AI Tools
+                        </TabsTrigger>
+                    </TabsList>
 
-                                                        {q.status === 'Pending' && (
-                                                            <Button variant="outline" size="sm" onClick={() => updateStatus(q.quotation_id, 'Paid')} className="text-blue-500 border-blue-200 hover:bg-blue-100">
-                                                                Mark Paid
-                                                            </Button>
-                                                        )}
-                                                        {(q.status === 'Paid' || q.status === 'In Progress') && (
-                                                            <Button variant="outline" size="sm" onClick={() => updateStatus(q.quotation_id, 'Done')} className="text-green-500 border-green-200 hover:bg-green-100">
-                                                                Mark Done
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                    <TabsContent value="quotations">
+                        <div className="flex justify-end items-center mb-4">
+                            <div className="flex items-center gap-2">
+                                <Filter className="w-4 h-4 text-muted-foreground" />
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Filter by Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        <SelectItem value="Pending">Pending</SelectItem>
+                                        <SelectItem value="Paid">Paid</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="Done">Done</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        </div>
+
+                        <Card className="border-border/50 shadow-elegant backdrop-blur-sm bg-card/95">
+                            <CardContent className="pt-6">
+                                {loading ? <p>Loading...</p> : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-border/50 text-left">
+                                                    <th className="py-4 px-2">ID</th>
+                                                    <th className="py-4 px-2">User</th>
+                                                    <th className="py-4 px-2">Services</th>
+                                                    <th className="py-4 px-2">Price (₦)</th>
+                                                    <th className="py-4 px-2">Status</th>
+                                                    <th className="py-4 px-2">Date</th>
+                                                    <th className="py-4 px-2">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredQuotations.map((q: any) => (
+                                                    <tr key={q.quotation_id} className="border-b border-border/50 hover:bg-muted/30">
+                                                        <td className="py-4 px-2 font-medium">{q.quotation_id}</td>
+                                                        <td className="py-4 px-2">
+                                                            <div className="flex flex-col">
+                                                                <span>{q.user_name}</span>
+                                                                <span className="text-xs text-muted-foreground">{q.user_email}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-2 text-sm max-w-[200px] truncate">
+                                                            {q.selected_services.map((s: any) => s.name).join(", ")}
+                                                        </td>
+                                                        <td className="py-4 px-2 text-sm">
+                                                            ₦{parseFloat(q.price_estimate_min_naira).toLocaleString()}
+                                                        </td>
+                                                        <td className="py-4 px-2">
+                                                            <Badge className={getStatusColor(q.status)}>{q.status}</Badge>
+                                                        </td>
+                                                        <td className="py-4 px-2 text-sm text-muted-foreground">
+                                                            {new Date(q.created_at).toLocaleDateString()}
+                                                        </td>
+                                                        <td className="py-4 px-2">
+                                                            <div className="flex gap-2">
+                                                                <Button variant="ghost" size="icon" title="Download PDF" onClick={() => handleDownloadQuotation(q.quotation_id)}>
+                                                                    <Download className="h-4 w-4" />
+                                                                </Button>
+
+                                                                {q.status === 'Pending' && (
+                                                                    <Button variant="outline" size="sm" onClick={() => updateStatus(q.quotation_id, 'Paid')} className="text-blue-500 border-blue-200 hover:bg-blue-100">
+                                                                        Mark Paid
+                                                                    </Button>
+                                                                )}
+                                                                {(q.status === 'Paid' || q.status === 'In Progress') && (
+                                                                    <Button variant="outline" size="sm" onClick={() => updateStatus(q.quotation_id, 'Done')} className="text-green-500 border-green-200 hover:bg-green-100">
+                                                                        Mark Done
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="ai-tools">
+                        <AdminAITools />
+                    </TabsContent>
+                </Tabs>
             </div>
             <Footer />
-            <DarkModeToggle />
-        </div>
+                    </div>
     );
 };
 
 export default AdminDashboard;
+

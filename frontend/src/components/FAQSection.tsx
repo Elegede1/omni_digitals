@@ -7,7 +7,7 @@ import {
 
 const faqs = [
   {
-    question: "What services does Boost Promotions offer?",
+    question: "What services does Omni Digitals offer?",
     answer: "We offer a comprehensive range of digital services including content marketing, graphic design, video editing, cloud hosting, market research, and virtual assistance to help your business grow."
   },
   {
@@ -19,7 +19,7 @@ const faqs = [
     answer: "Yes! We work with startups, small businesses, and large enterprises. Our scalable solutions are designed to grow with your business needs."
   },
   {
-    question: "What makes Boost Promotions different?",
+    question: "What makes Omni Digitals different?",
     answer: "Our personalized approach, cutting-edge strategies, and commitment to delivering measurable results set us apart. We focus on building long-term partnerships with our clients."
   },
   {
@@ -44,8 +44,8 @@ const FAQSection = () => {
         <div className="max-w-4xl mx-auto">
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem 
-                key={index} 
+              <AccordionItem
+                key={index}
                 value={`item-${index}`}
                 className="bg-card border border-border rounded-lg px-6 shadow-sm hover:shadow-elegant transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}

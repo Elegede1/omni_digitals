@@ -17,6 +17,9 @@ import Quotations from "./pages/Quotations";
 
 import AdminDashboard from "./pages/AdminDashboard";
 import Works from "./pages/Works";
+import AboutUs from "./pages/AboutUs";
+import Services from "./pages/Services";
+import OmniAssist from "./components/OmniAssist";
 
 const queryClient = new QueryClient();
 
@@ -39,12 +42,16 @@ const App = () => (
           <Route path="/quotations" element={<Quotations />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/works" element={<Works />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/services" element={<Services />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <OmniAssist />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
 
 export default App;
+

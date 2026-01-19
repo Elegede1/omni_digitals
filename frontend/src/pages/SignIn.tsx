@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -106,8 +105,7 @@ const SignIn = () => {
             </div>
           </CardContent>
         </Card>
-        <DarkModeToggle />
-      </div>
+              </div>
     </>
   );
 };

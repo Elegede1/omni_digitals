@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { User, Settings, LogOut, BarChart3, MessageSquare, CreditCard, LayoutDashboard, Camera } from "lucide-react";
@@ -492,8 +491,7 @@ const Profile = () => {
         </div>
       </div>
       <Footer />
-      <DarkModeToggle />
-    </div>
+          </div>
   );
 };
 

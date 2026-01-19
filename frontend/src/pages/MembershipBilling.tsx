@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { Check, CreditCard, Calendar, Download } from "lucide-react";
 
@@ -255,8 +254,7 @@ const MembershipBilling = () => {
         </div>
       </div>
       <Footer />
-      <DarkModeToggle />
-    </div>
+          </div>
   );
 };
 

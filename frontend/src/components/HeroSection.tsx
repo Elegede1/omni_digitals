@@ -121,7 +121,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl">
-              Welcome to Boost Promotions, your trusted online service partner. We provide tailored solutions,
+              Welcome to Omni Digitals, your trusted online service partner. We provide tailored solutions,
               including digital marketing, branding, and web development, to help your business shine. Our
               team is dedicated to driving your success and delivering exceptional results.
             </p>

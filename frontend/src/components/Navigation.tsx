@@ -19,6 +19,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import DarkModeToggle from "@/components/DarkModeToggle";
+
 
 interface Notification {
   id: number;
@@ -132,23 +134,23 @@ const Navigation = () => {
             <img
               src={logoLight}
               alt="MNI Digitals"
-              className="h-16 w-auto dark:hidden transition-all duration-300 group-hover:scale-105 mix-blend-multiply"
+              className="h-20 w-auto dark:hidden transition-all duration-300 group-hover:scale-105 mix-blend-multiply"
             />
             <img
               src={logoDark}
               alt="MNI Digitals"
-              className="h-16 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105 mix-blend-lighten"
+              className="h-20 w-auto hidden dark:block transition-all duration-300 group-hover:scale-105 mix-blend-lighten"
             />
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#about" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               About us
-            </a>
-            <a href="#services" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
+            </Link>
+            <Link to="/services" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Services
-            </a>
+            </Link>
             <Link to="/community" className="text-foreground hover:text-primary transition-colors duration-300 font-medium">
               Community
             </Link>
@@ -162,6 +164,9 @@ const Navigation = () => {
             )}
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
+                {/* Dark Mode Toggle */}
+                <DarkModeToggle />
+
                 {/* Notification Bell with Popover */}
                 <Popover>
                   <PopoverTrigger asChild>
@@ -250,11 +255,14 @@ const Navigation = () => {
                 </DropdownMenu>
               </div>
             ) : (
-              <>
+              <div className="flex items-center space-x-3">
+                {/* Dark Mode Toggle */}
+                <DarkModeToggle />
+
                 <Link to="/signin">
                   <Button
                     variant="outline"
-                    className="mr-2 border-primary text-primary hover:bg-primary/10 transition-all duration-300"
+                    className="border-primary text-primary hover:bg-primary/10 transition-all duration-300"
                   >
                     Sign In
                   </Button>
@@ -267,7 +275,7 @@ const Navigation = () => {
                     Sign Up
                   </Button>
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
@@ -284,12 +292,12 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-card/95 backdrop-blur-sm border-t border-border animate-slide-down">
             <div className="px-4 py-6 space-y-4">
-              <a href="#about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
+              <Link to="/about" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 About us
-              </a>
-              <a href="#services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
+              </Link>
+              <Link to="/services" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 Services
-              </a>
+              </Link>
               <Link to="/community" className="block text-foreground hover:text-primary transition-colors duration-300 font-medium">
                 Community
               </Link>
@@ -297,6 +305,12 @@ const Navigation = () => {
                 Works
               </Link>
               <div className="space-y-2">
+                {/* Dark Mode Toggle in Mobile Menu */}
+                <div className="flex items-center justify-between p-2 border-b border-border/50 mb-2">
+                  <span className="text-sm font-medium">Dark Mode</span>
+                  <DarkModeToggle />
+                </div>
+
                 {isAuthenticated ? (
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between border-b pb-2 mb-2">

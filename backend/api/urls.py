@@ -52,6 +52,7 @@ urlpatterns = [
     path('signin/', signin, name='signin'),
     path('signup/', signup, name='signup'),
     path('chat/', chat, name='chat'),
+    path('chat/messages/<int:message_id>/react/', react_to_message, name='react_to_message'),
     path('community/', community, name='community'),
     path('dashboard/', dashboard_data, name='dashboard'),
     # Community Posts

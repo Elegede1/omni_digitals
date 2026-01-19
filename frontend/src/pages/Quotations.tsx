@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { Eye, Download, Filter } from "lucide-react";
 
@@ -351,8 +350,7 @@ const Quotations = () => {
         </div>
       </div>
       <Footer />
-      <DarkModeToggle />
-    </div>
+          </div>
   );
 };
 

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DarkModeToggle from "@/components/DarkModeToggle";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -96,8 +95,7 @@ const Works = () => {
                 )}
             </div>
             <Footer />
-            <DarkModeToggle />
-        </div>
+                    </div>
     );
 };
 
